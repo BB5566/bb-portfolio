@@ -1,0 +1,80 @@
+# Gemini 審 PR（僅手動）
+# 免費 AI Studio 金鑰每日只有 20 次請求，撐不起自動審查，所以不自動觸發。
+# 平常的 PR 審查由杰哥（Hermes）負責；這條留作備用：
+# - 在 PR 留言「@gemini-cli /review」（限 repo 擁有者／協作者）
+# - Actions 頁面「Run workflow」填 PR 編號
+# 用 secret GEMINI_API_KEY 跑 gemini-3.8-flash，評論一律台灣繁體中文
+name: Gemini Review
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 要審的 PR 編號
+        required: true
+
+concurrency:
+  group: gemini-review-${{ inputs.pr || github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.issue.pull_request &&
+        startsWith(github.event.comment.body, '@gemini-cli /review') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: 準備給 Gemini 的 PR 資訊
+        env:
+          PR_NUMBER: ${{ inputs.pr || github.event.pull_request.number || github.event.issue.number }}
+        run: |
+          mkdir -p .gemini
+          jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg pr "$PR_NUMBER" \
+            --arg context "所有評論與摘要一律使用台灣繁體中文撰寫。" \
+            '{repository: $repo, pull_request_number: $pr, additional_context: $context}' \
+            > .gemini/context.json
+
+      - name: Gemini 審查
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: gemini-3.8-flash
+          github_pr_number: ${{ inputs.pr || github.event.pull_request.number || github.event.issue.number }}
+          workflow_name: gemini-review
+          extensions: |
+            ["https://github.com/gemini-cli-extensions/code-review"]
+          prompt: /pr-code-review
+          settings: |
+            {
+              "model": { "maxSessionTurns": 25 },
+              "mcpServers": {
+                "github": {
+                  "command": "docker",
+                  "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server:v0.27.0"],
+                  "includeTools": ["add_comment_to_pending_review", "pull_request_read", "pull_request_review_write"],
+                  "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+                }
+              },
+              "tools": { "core": [] }
+            }

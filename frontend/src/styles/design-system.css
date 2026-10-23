@@ -1,0 +1,476 @@
+/* ============================================
+   NEO-BRUTALIST × LUXURY TECH DESIGN SYSTEM
+   Unified Theme Variables
+   ============================================ */
+
+:root {
+  /* === Core Palette (Dune / Arrakis) === */
+  --ink: #08090a;
+  /* Cool Near-White (Linear primary text — not pure white, prevents eye strain) */
+  --pearl: #f7f8f8;
+  --chrome: #c2b280;
+  /* Beige / Sand */
+  --gunmetal: #2b2620;
+  /* Dark Rock */
+  --titanium: #544d44;
+  /* Stone */
+
+  /* === Accent Colors === */
+  --volt: #e1c16e;
+  /* Sand Gold (Primary) - Replacing Volt */
+  --ibad-blue: #00a4cc;
+  /* Eyes of Ibad - CTA Accent Color */
+  --cyber-pink: #00a3e0;
+  /* Spice Blue (Secondary) - Replacing Pink */
+  --electric-blue: #40e0d0;
+  /* Turquoise / Water of Life */
+  --plasma: #c19a6b;
+  /* Deep Sand / Bronze */
+
+  /* === Functional Mappings === */
+  --primary: var(--volt);
+  --primary-dark: #b89b50;
+  --primary-light: rgba(225, 193, 110, 0.15);
+
+  --accent: var(--cyber-pink);
+  --accent-dark: #007bb8;
+  --accent-light: rgba(0, 163, 224, 0.15);
+
+  --cta: var(--ibad-blue);
+  --cta-dark: #008aa8;
+  --cta-light: rgba(0, 164, 204, 0.2);
+  --cta-glow: 0 0 20px rgba(0, 164, 204, 0.5), 0 0 40px rgba(0, 164, 204, 0.3);
+
+  --bg: var(--ink);
+  --surface: #0f1011;
+  /* Elevated Surface — Linear level 3 */
+  --surface-light: #191a1b;
+
+  --text: var(--pearl);
+  --text-secondary: #d0d6e0;
+  /* Cool Silver Gray (Linear secondary) */
+  --text-muted: #8a8f98;
+  /* Cool Medium Gray (Linear tertiary) */
+  --text-light: #b8ad9a;
+  /* Light Sand (between secondary and muted) */
+  --text-inverse: var(--ink);
+
+  /* === Sophisticated Neutrals === */
+  --noir-100: #0a0806;
+  --noir-90: #14100d;
+  --noir-80: #1f1915;
+  --noir-70: #2e2620;
+  --noir-60: #40362e;
+
+  --blanc-100: #ffffff;
+  --blanc-95: #f7f3eb;
+  --blanc-90: #f0e6d2;
+  --blanc-80: #e0d6c0;
+  --blanc-70: #d1c4a8;
+
+  /* === Typography === */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-heading: 'Outfit', sans-serif;
+
+  /* === Typography Scale === */
+  --text-mega: clamp(4rem, 12vw, 8rem);
+  --text-hero: clamp(3rem, 8vw, 6rem);
+  --text-title: clamp(2rem, 5vw, 3.5rem);
+  --text-heading: clamp(1.5rem, 3vw, 2.5rem);
+  --text-subheading: clamp(1.25rem, 2vw, 1.75rem);
+  --text-body: 1.125rem;
+  --text-small: 0.875rem;
+  --text-micro: 0.75rem;
+
+  /* === Font Size Aliases (Legacy Support) === */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem; /* 補上缺失的 token，各 admin view 都有用到 */
+
+  /* === Spacing Rhythm === */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* === Border Radius Tokens === */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* === Shadows & Effects === */
+  --brutal-shadow-sm: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  --brutal-shadow-md: 8px 8px 0px rgba(0, 0, 0, 0.5);
+  --brutal-shadow-lg: 12px 12px 0px rgba(0, 0, 0, 0.5);
+  --brutal-shadow-xl: 16px 16px 0px rgba(0, 0, 0, 0.5);
+
+  --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --glow-primary: 0 0 25px var(--primary-light);
+  --glow-accent: 0 0 25px var(--accent-light);
+
+  /* === Gradients === */
+  --gradient-aurora: linear-gradient(135deg, var(--volt) 0%, #c19a6b 50%, var(--cyber-pink) 100%);
+  --gradient-sand: linear-gradient(
+    180deg,
+    rgba(225, 193, 110, 0) 0%,
+    rgba(225, 193, 110, 0.05) 100%
+  );
+  --gradient-dark: linear-gradient(135deg, var(--bg) 0%, var(--surface) 100%);
+
+  /* === Borders === */
+  --border-brutal: 2px solid var(--volt);
+  --border-thin: 1px solid rgba(225, 193, 110, 0.2);
+  --border-light: rgba(255, 255, 255, 0.08);
+
+  /* === Animation === */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-spring: cubic-bezier(0.43, 0.195, 0.02, 0.96);
+  --transition:
+    color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    background-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    border-color 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* === Z-Index === */
+  --z-canvas: -1;
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-overlay: 100;
+  --z-modal: 1000;
+  --z-toast: 10000;
+
+  /* === Desktop OS Chrome (Linear-grade) === */
+  --os-menubar-h: 32px;
+  --os-dock-h: 76px;
+  --os-radius: 10px;
+  /* Linear dark chrome — cool near-black translucent surfaces */
+  --os-chrome: rgba(15, 16, 17, 0.72);
+  /* 巢狀在 backdrop-filter 元素內的浮層（選單、tooltip）毛玻璃會失效，改用近乎不透明底色 */
+  --os-chrome-solid: rgba(25, 26, 27, 0.97);
+  /* 半透明白邊框取代金色邊框 — Linear 的邊框語言 */
+  --os-chrome-border: rgba(255, 255, 255, 0.08);
+  --os-window-bg: rgba(15, 16, 17, 0.93);
+  --os-blur: blur(24px) saturate(160%);
+  --os-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 0 0.5px rgba(255, 255, 255, 0.05);
+
+  /* === Element Plus Theme Overrides === */
+  --el-color-primary: var(--ibad-blue);
+  --el-color-primary-light-3: rgba(0, 164, 204, 0.7);
+  --el-color-primary-light-5: rgba(0, 164, 204, 0.5);
+  --el-color-primary-light-7: rgba(0, 164, 204, 0.3);
+  --el-color-primary-light-9: rgba(0, 164, 204, 0.1);
+  --el-color-primary-dark-2: #008aa8;
+}
+
+/* === Global Reset & Base Styles === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Custom Cursor - Only on public site, respecting accessibility */
+@media (hover: hover) and (pointer: fine) {
+  .main-stage *,
+  .main-stage *::before,
+  .main-stage *::after {
+    cursor: none !important;
+  }
+
+  .main-stage a,
+  .main-stage button,
+  .main-stage [role='button'],
+  .main-stage input[type='submit'],
+  .main-stage input[type='button'],
+  .main-stage .btn,
+  .main-stage .hybrid-btn,
+  .main-stage .dock-item,
+  .main-stage .bento-card,
+  .main-stage .action-btn,
+  .main-stage [data-magnetic-strength] {
+    cursor: none !important;
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .main-stage *,
+  .main-stage *::before,
+  .main-stage *::after {
+    cursor: auto !important;
+  }
+}
+
+/* Hide GSAP ScrollTrigger debug markers if accidentally enabled */
+.gsap-marker-start,
+.gsap-marker-end,
+.gsap-marker-scroller-start,
+.gsap-marker-scroller-end {
+  display: none !important;
+}
+
+::selection {
+  background: var(--volt);
+  color: var(--ink);
+}
+
+/* Custom Cursor Styles */
+html {
+  font-size: 16px;
+  /* scroll-behavior 由 Lenis 接管，不在此設定以避免衝突 */
+}
+
+/* Interactive elements cursor */
+a,
+button,
+[role='button'],
+.project-card,
+.stat-card,
+.dock-item {
+  cursor: pointer;
+}
+
+/* Focus states for accessibility */
+a:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--volt);
+  outline-offset: 4px;
+  border-radius: var(--radius-xs);
+  box-shadow: 0 0 12px rgba(225, 193, 110, 0.4);
+}
+
+/* === Mobile Touch Targets (A11y Apple HIG) === */
+@media (max-width: 768px) {
+  a,
+  button,
+  [role='button'],
+  .dock-item,
+  .social-link {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* 桌面 OS 首頁：頁面本身不捲動，捲動只發生在視窗內 */
+body.desktop-os-active {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* === Utility Classes === */
+.brutal-border {
+  border: var(--border-brutal);
+}
+
+.brutal-shadow {
+  box-shadow: var(--brutal-shadow-md);
+  transition: box-shadow 0.2s var(--ease-out-expo);
+}
+
+.brutal-shadow:hover {
+  box-shadow: var(--brutal-shadow-sm);
+}
+
+.text-gradient {
+  background: var(--gradient-aurora);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-dark);
+  border: 2px solid var(--bg);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* ============================================
+   GLOBAL CLS (Cumulative Layout Shift) FIXES
+   防止各種元素尺寸跳動
+   ============================================ */
+
+/* 1. Form item error message 絕對定位，不占用 layout 空間 */
+.el-form-item {
+  margin-bottom: 24px !important;
+  position: relative;
+}
+
+.el-form-item__content {
+  position: relative;
+  min-height: 32px; /* 保留穩定高度 */
+}
+
+.el-form-item__error {
+  position: absolute !important;
+  top: 100%;
+  left: 0;
+  padding-top: 2px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 2. el-input-number 控制按鈕不影響寬度 */
+.el-input-number {
+  width: 100% !important;
+}
+
+.el-input-number .el-input__wrapper {
+  padding-right: 50px !important; /* 為右側箭頭預留空間 */
+}
+
+/* 3. 圖片統一加入尺寸佔位，避免載入時跳動 */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* 4. el-tag 加入固定高度，避免 closable 狀態切換時跳動 */
+.el-tag {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* 5. v-if 造成 button↔input 切換時的高度穩定 */
+.skills-tags,
+.role-texts-manager {
+  min-height: 32px;
+}
+
+/* 6. el-card loading 時保持最小高度 */
+.el-card[v-loading] {
+  min-height: 200px;
+}
+
+/* 7. el-table 行高穩定 */
+.el-table .el-table__cell {
+  vertical-align: middle;
+}
+
+/* 8. 確保 transition 不影響佔位 */
+.fade-enter-active,
+.fade-leave-active {
+  position: relative;
+  width: 100%;
+}
+
+/* 9. el-dropdown-menu 不影響父層寬度 */
+.el-dropdown-menu {
+  width: max-content;
+  min-width: 120px;
+}
+
+/* 10. 統一 el-button 高度，避免 icon 有無時跳動 */
+.el-button {
+  flex-shrink: 0;
+}
+
+/* 11. header/nav 固定高度，避免內容載入前後跳動 */
+.admin-header {
+  height: 60px !important;
+  box-sizing: border-box;
+}
+
+/* ============================================
+   ADMIN PANEL — 共用頁面樣式
+   各 admin view 直接使用這些 class，不再重複定義
+   ============================================ */
+
+.admin-page-view {
+  padding: var(--space-lg);
+}
+
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-xl);
+  gap: var(--space-md);
+}
+
+.admin-page-header--col {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.admin-page-title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.admin-page-subtitle {
+  color: var(--text-muted);
+  margin: 0.25rem 0 0 0;
+  font-size: var(--font-size-sm);
+}
+
+/* form-tip 統一樣式（目前各 view 有 margin-left 或 display: block 兩種版本） */
+.form-tip {
+  font-size: var(--font-size-sm);
+  color: var(--el-text-color-secondary, var(--text-muted));
+  margin-top: 4px;
+  display: block;
+  line-height: 1.4;
+}
+
+/* ============================================
+   ACCESSIBILITY: prefers-reduced-motion
+   尊重使用者系統的「減少動態效果」設定
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

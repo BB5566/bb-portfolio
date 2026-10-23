@@ -1,0 +1,138 @@
+# 生產環境 Docker Compose 配置
+# 使用方式: docker-compose -f docker-compose.prod.yml up -d
+#
+# Image 來源: GitHub Container Registry (ghcr.io/BB5566/portfolio-*)
+# CI (ci.yml deploy job) 在每次 push main 時自動 build + push 新 image
+# NAS 上的 Watchtower 每 60 秒輪詢，自動拉取新 image 並重啟容器
+#
+# 特點：
+#   - 前端 (Vue+Nginx) 與後端 (Laravel+Apache) 分離容器
+#   - 搭配 Watchtower 實現全自動零觸碰部署
+#   - 不含 phpMyAdmin（安全考量）
+
+services:
+  # Portfolio 後端（Laravel API）
+  backend:
+    image: ghcr.io/bb5566/portfolio-backend:latest
+    container_name: portfolio-backend-prod
+    restart: always
+    ports:
+      - "8000:80"
+    command: >
+      sh -c "
+        php /var/www/html/backend/artisan migrate --force || echo 'Migration failed, starting server anyway';
+        php /var/www/html/backend/artisan db:seed --force --class=ProjectSeeder || echo 'Project seeder failed, continuing';
+        php /var/www/html/backend/artisan db:seed --force --class=ProfileSeeder || echo 'Profile seeder failed, continuing';
+        php /var/www/html/backend/artisan optimize:clear;
+        php /var/www/html/backend/artisan config:cache;
+        php /var/www/html/backend/artisan route:cache;
+        php /var/www/html/backend/artisan view:cache;
+        apache2-foreground
+      "
+    volumes:
+      - ./uploads:/var/www/html/uploads
+      - ./logs:/var/www/html/logs
+      - ./backend/storage:/var/www/html/backend/storage
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=portfolio_db
+      - DB_USERNAME=portfolio_user
+      - DB_PASSWORD=${DB_PASSWORD}
+      - APP_NAME=Portfolio
+      - APP_ENV=production
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=false
+      - APP_URL=https://bb-made.com
+      - SANCTUM_STATEFUL_DOMAINS=bb-made.com,www.bb-made.com,localhost
+      - CORS_ALLOWED_ORIGINS=https://bb-made.com,https://www.bb-made.com
+      # TRUSTED_PROXIES 應設定為 Cloudflare IP 範圍
+      # 已於 .env 設定完整清單，此處作為 fallback
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-173.245.48.0/20,103.21.244.0/22,103.22.200.0/22,103.31.4.0/22,141.101.64.0/18,108.162.192.0/18,190.93.240.0/20,188.114.96.0/20,197.234.240.0/22,198.41.128.0/17,162.158.0.0/15,104.16.0.0/13,104.24.0.0/14,172.64.0.0/13,131.0.72.0/22}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Portfolio 前端（Vue 靜態檔案）
+  frontend:
+    image: ghcr.io/bb5566/portfolio-frontend:latest
+    container_name: portfolio-frontend-prod
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # MySQL 資料庫容器
+  db:
+    image: mysql:8.0
+    container_name: portfolio-db-prod
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: portfolio_db
+      MYSQL_USER: portfolio_user
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - portfolio-network
+
+  # Watchtower — 自動拉取新 image 並重啟容器
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: portfolio-watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      --interval 60
+      --cleanup
+      --label-enable
+      portfolio-backend-prod portfolio-frontend-prod
+    networks:
+      - portfolio-network
+
+  # 備份服務（可選）
+  backup:
+    image: mysql:8.0
+    container_name: portfolio-backup
+    restart: "no"
+    volumes:
+      - db-data:/var/lib/mysql:ro
+      - ./backups:/backups
+    command: >
+      bash -c "mysqldump -h db -u root -p${DB_PASSWORD} portfolio_db > /backups/backup_$$(date +%Y%m%d_%H%M%S).sql"
+    depends_on:
+      - db
+    networks:
+      - portfolio-network
+
+volumes:
+  db-data:
+    driver: local
+
+networks:
+  portfolio-network:
+    driver: bridge

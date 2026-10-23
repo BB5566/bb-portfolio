@@ -1,0 +1,143 @@
+# === 🔒 憑證與敏感資料 ===
+*.env
+*.env.local
+*.env.production
+config.local.php
+database.local.php
+secrets.json
+*.key
+*.pem
+.htpasswd
+
+# === 💻 作業系統 ===
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+@eaDir
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.nfs*
+
+# === 🛠️ IDE/編輯器 ===
+# VS Code
+.vscode/
+*.code-workspace
+
+# PhpStorm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+
+# === 📦 依賴與套件 ===
+node_modules/
+vendor/
+/package-lock.json
+yarn.lock
+
+# Laravel backend
+backend/vendor/
+backend/.env
+backend/storage/logs/
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+backend/storage/framework/views/
+backend/bootstrap/cache/*
+!backend/bootstrap/cache/.gitkeep
+
+# Vue frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# === 📊 日誌與快取 ===
+logs/
+*.log
+*.log.*
+cache/
+*.cache
+.cache/
+.sass-cache/
+
+# === 🗄️ 資料庫與備份 ===
+*.sqlite
+*.sqlite3
+*.db
+*.sql.backup
+portfolio_db.sql
+
+# === 📁 上傳與媒體檔案 ===
+uploads/*
+!uploads/.gitkeep
+
+# === 📋 文件與說明 ===
+# docs/
+
+# === 🔧 建置與編譯 ===
+dist/
+build/
+*.css.map
+*.js.map
+*.min.css
+*.min.js
+
+# === 🧪 測試 ===
+coverage/
+.nyc_output/
+*.lcov
+
+# === 📋 備份與暫存 ===
+*.backup
+*.bak
+*.tmp
+*.temp
+*.local
+
+# === 🚀 部署相關 ===
+.htaccess.backup
+deploy.php
+deployment-config.json
+
+# === 📝 專案特定 ===
+.todo
+.notes
+debug.log
+error.log
+access.log
+admin/.htpasswd
+
+# Ignore Synology's system directory for thumbnails and metadata
+@eaDir/
+.DS_Store
+
+# Allow .gitkeep in empty directories
+!.gitkeep
+!uploads/placeholder.jpg
+!uploads/placeholder.svg

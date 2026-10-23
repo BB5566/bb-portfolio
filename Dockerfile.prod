@@ -1,0 +1,122 @@
+# 生產環境 Dockerfile
+# 多階段建構，減少映像大小
+
+# ====================================================================
+# Stage 1: 建構階段
+# ====================================================================
+FROM php:8.2-apache@sha256:2a195673289c069f54a07c83353768df8930d1ee0a0e03faebe7b5aa51dabbcd AS builder
+
+# 安裝必要的系統套件
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    zip \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip gd \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安裝 Composer
+COPY --from=composer:2@sha256:5946476338742b200bb9ff88f8be56275ddae4b3949c72305cb0dbf10cfcb760 /usr/bin/composer /usr/bin/composer
+
+# 設定工作目錄
+WORKDIR /var/www/html
+
+# 複製 composer 檔案並安裝依賴（生產環境優化）
+COPY backend/composer.json backend/composer.lock* ./backend/
+RUN cd backend && composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# ====================================================================
+# Stage 2: 生產階段
+# ====================================================================
+FROM php:8.2-apache@sha256:2a195673289c069f54a07c83353768df8930d1ee0a0e03faebe7b5aa51dabbcd
+
+# 僅安裝必要的 PHP 擴展
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install pdo pdo_mysql mysqli zip gd \
+    && rm -rf /var/lib/apt/lists/*
+
+# 啟用 Apache 模組
+RUN a2enmod rewrite headers ssl
+
+# 設定 Apache DocumentRoot 指向 Laravel public 目錄
+ENV APACHE_DOCUMENT_ROOT /var/www/html/backend/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}/!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+# 設定工作目錄
+WORKDIR /var/www/html
+
+# 從建構階段複製依賴
+COPY --from=builder /var/www/html/backend/vendor ./backend/vendor
+
+# 複製專案檔案（排除開發用和日誌目錄，優化 image 大小）
+COPY backend/composer.json backend/composer.lock* backend/.env.example backend/artisan ./backend/
+COPY backend/app/ ./backend/app/
+COPY backend/bootstrap/ ./backend/bootstrap/
+COPY backend/config/ ./backend/config/
+COPY backend/database/ ./backend/database/
+COPY backend/public/ ./backend/public/
+COPY backend/resources/ ./backend/resources/
+COPY backend/routes/ ./backend/routes/
+# vendor 已經從 builder stage 複製，storage 由 volume 掛載
+
+# 設定權限（安全優化）
+# 註：backend/storage 此階段尚未存在（未 COPY，由下方 mkdir -p 建立後再設權限），
+# 不可在此 chmod，否則 chmod 找不到目錄會以 exit 1 中斷 Docker build。
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+# 建立必要目錄與設定框架權限
+RUN mkdir -p /var/www/html/uploads /var/www/html/logs \
+    /var/www/html/backend/storage/framework/sessions \
+    /var/www/html/backend/storage/framework/views \
+    /var/www/html/backend/storage/framework/cache \
+    /var/www/html/backend/storage/logs \
+    /var/www/html/backend/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/uploads /var/www/html/logs /var/www/html/backend/storage /var/www/html/backend/bootstrap/cache \
+    && chmod -R 775 /var/www/html/uploads /var/www/html/logs /var/www/html/backend/storage /var/www/html/backend/bootstrap/cache
+
+# PHP 生產環境優化
+RUN { \
+    echo 'expose_php = Off'; \
+    echo 'display_errors = Off'; \
+    echo 'log_errors = On'; \
+    echo 'error_log = /var/www/html/logs/php_errors.log'; \
+    echo 'upload_max_filesize = 10M'; \
+    echo 'post_max_size = 10M'; \
+    echo 'memory_limit = 256M'; \
+    echo 'max_execution_time = 30'; \
+} > /usr/local/etc/php/conf.d/production.ini
+
+# 安全性：移除不必要的檔案與開發環境快取
+RUN rm -rf /var/www/html/.git \
+    && rm -f /var/www/html/.env.example \
+    && rm -f /var/www/html/backend/bootstrap/cache/*.php
+
+# 健康檢查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/api/v1/health || exit 1
+
+# 暴露端口
+EXPOSE 80 443
+
+# 複製啟動腳本
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# 啟動容器
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["apache2-foreground"]

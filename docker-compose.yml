@@ -1,0 +1,184 @@
+# Synology NAS 專用 Docker Compose 配置
+# 前後端分離部署，適合 Synology NAS 環境
+#
+# 相關 compose 檔案：
+#   - docker-compose.prod.yml  → 生產環境部署（整合建置）
+
+services:
+  # Portfolio 後端（Laravel API）
+  backend:
+    image: ${PORTFOLIO_BACKEND_IMAGE:-portfolio-backend:2026-07-18-security}
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: portfolio-backend
+    restart: unless-stopped
+    mem_limit: 768m
+    pids_limit: 200
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+    ports:
+      - "127.0.0.1:8000:80"
+    command: >
+      sh -c "
+        php /var/www/html/backend/artisan migrate --force &&
+        apache2-foreground
+      "
+    volumes:
+      - ./backend/storage:/var/www/html/backend/storage
+      - ./uploads:/var/www/html/uploads
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_CONNECTION=mysql
+      - DB_DATABASE=portfolio_db
+      - DB_USERNAME=portfolio_user
+      - DB_PASSWORD=${DB_PASSWORD}
+      - APP_NAME=Portfolio
+      - APP_ENV=production
+      - APP_KEY=${APP_KEY}
+      - APP_DEBUG=false
+      - APP_URL=https://bb-made.com
+      - SANCTUM_STATEFUL_DOMAINS=bb-made.com,www.bb-made.com,localhost
+      - CORS_ALLOWED_ORIGINS=https://bb-made.com,https://www.bb-made.com,http://localhost:3000
+      - TRUSTED_PROXIES=${TRUSTED_PROXIES:-127.0.0.1,172.16.0.0/12,10.0.0.0/8}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Portfolio 前端（Vue 靜態檔案）
+  frontend:
+    image: ${PORTFOLIO_FRONTEND_IMAGE:-portfolio-frontend:2026-07-18-security}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:8000}
+    container_name: portfolio-frontend
+    restart: unless-stopped
+    mem_limit: 256m
+    pids_limit: 100
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - backend
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MySQL 資料庫
+  db:
+    image: mysql:8.0
+    container_name: portfolio-db
+    restart: unless-stopped
+    mem_limit: 1024m
+    pids_limit: 200
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      # 持久化資料（重要！）
+      - db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      # 備份目錄
+      - ./backups:/backups
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: portfolio_db
+      MYSQL_USER: portfolio_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-changeme}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 90s
+    networks:
+      - portfolio-network
+
+  # phpMyAdmin（除錯用，預設不啟動）
+  # 啟動方式：docker-compose -f docker-compose.yml --profile debug up -d
+  # ⚠️ 安全提醒：僅在除錯時暫時啟動，完成後立即停止
+  # 建議：使用 docker exec -it portfolio-db mysql -u root -p 替代
+  phpmyadmin:
+    profiles: ["debug"]
+    image: phpmyadmin:5.2
+    container_name: portfolio-phpmyadmin-debug
+    restart: "no"
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # 強制 HTTPS 並限制主機驗證
+      PMA_ABSOLUTE_URI: "http://127.0.0.1:8081/"
+      PMA_COOKIE_LIFETIME: 300  # 5 分鐘後自動登出
+    depends_on:
+      - db
+    networks:
+      - portfolio-network
+
+volumes:
+  db-data:
+    driver: local
+
+networks:
+  portfolio-network:
+    driver: bridge
+
+# ====================================================================
+# Synology NAS 部署說明
+# ====================================================================
+#
+# 1. 建立 .env 檔案（在同目錄下）
+#    APP_KEY=base64:your_app_key_here
+#    DB_PASSWORD=your_secure_db_password
+#    MYSQL_ROOT_PASSWORD=your_secure_root_password
+#    VITE_API_BASE_URL=http://your-nas-ip:8000/api/v1
+#    VITE_BACKEND_URL=http://your-nas-ip:8000
+#    SANCTUM_STATEFUL_DOMAINS=bb-made.com,www.bb-made.com,your-nas-ip:3000
+#
+# 2. 建構並啟動服務
+#    docker-compose -f docker-compose.synology.yml build
+#    docker-compose -f docker-compose.synology.yml up -d
+#
+# 3. 初始化資料庫
+#    docker exec portfolio-backend php /var/www/html/backend/artisan migrate --force
+#
+# 4. 訪問服務
+#    - 前端: http://nas-ip:3000
+#    - API:  http://nas-ip:8000/api/v1
+#    - phpMyAdmin: http://nas-ip:8081 (僅 debug profile 啟動時)
+#
+# 5. 查看日誌
+#    docker-compose logs -f
+#
+# 6. 更新程式碼
+#    git pull
+#    docker-compose -f docker-compose.synology.yml build
+#    docker-compose -f docker-compose.synology.yml up -d
+#
+# 7. 備份資料庫
+#    docker exec portfolio-db mysqldump -u root -p${MYSQL_ROOT_PASSWORD} portfolio_db > backups/backup_$(date +%Y%m%d).sql
+#
+# ====================================================================
