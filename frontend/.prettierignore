@@ -1,0 +1,14 @@
+dist
+node_modules
+public
+.git
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.webp
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

@@ -1,0 +1,70 @@
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Environment files (sensitive)
+.env
+.env.*
+!.env.example
+!.env.docker.example
+
+# Dependencies (will be installed in container)
+node_modules
+vendor
+backend/vendor
+
+# IDE and editor files
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+**/storage/logs/*
+storage/logs/*
+**/logs/*
+backend/storage/logs/**
+backend/storage/framework/cache/data/**
+logs/*
+
+# Cache and temp files
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*
+
+# Test files
+tests/
+backend/tests/
+coverage/
+.phpunit.result.cache
+
+# Build artifacts
+dist/
+build/
+security-reports/
+.trivy-cache/
+.gnupg-backup/
+.backup-recipient
+
+# Documentation
+*.md
+!README.md
+
+# SQL backups
+*.sql
+backups/
+
+# Submodules (build separately)
+projects/
+
+# OS files
+Thumbs.db
+Desktop.ini
