@@ -52,7 +52,6 @@ const useZaraz = import.meta.env.VITE_USE_ZARAZ === 'true'
 if (measurementId && measurementId !== 'G-XXXXXXXXXX') {
   app.use(GtagPlugin, {
     measurementId,
-    router,
     debug: import.meta.env.DEV,
     useZaraz
   })

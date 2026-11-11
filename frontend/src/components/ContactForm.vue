@@ -1,5 +1,7 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="contact-form">
+  <form @submit.prevent="handleSubmit" class="contact-form" :class="{ compact }">
+    <!-- 姓名＋Email：精簡版在寬螢幕排成一列 -->
+    <div class="pair">
     <!-- 姓名 -->
     <div class="form-group">
       <label for="name" class="form-label">
@@ -49,8 +51,10 @@
       </span>
     </div>
 
-    <!-- 主旨 -->
-    <div class="form-group">
+    </div>
+
+    <!-- 主旨：精簡版（首頁）不放，選填欄位少一格就少一個猶豫 -->
+    <div v-if="!compact" class="form-group">
       <label for="subject" class="form-label">
         <LucideIcon name="Heading" :size="16" />
         主旨
@@ -85,7 +89,7 @@
         class="form-textarea"
         :class="{ error: errors.message }"
         placeholder="請輸入您想說的話..."
-        rows="6"
+        :rows="compact ? 4 : 6"
         maxlength="5000"
         :disabled="loading"
         @blur="markTouched('message')"
@@ -94,7 +98,11 @@
       <span v-if="touched.message && errors.message" class="error-message" role="alert">
         {{ errors.message }}
       </span>
-      <span class="char-count" :class="{ warning: formData.message.length > 4500 }">
+      <span
+        v-if="!compact || formData.message.length > 4000"
+        class="char-count"
+        :class="{ warning: formData.message.length > 4500 }"
+      >
         {{ formData.message.length }} / 5000
       </span>
     </div>
@@ -131,6 +139,9 @@ import { ref, reactive, onUnmounted } from 'vue'
 import { submitContactForm, type ContactFormData } from '@/services/contact'
 import { useGtag } from '@/plugins/gtag'
 import LucideIcon from '@/components/LucideIcon'
+
+// compact：首頁用的精簡版，拿掉選填的主旨、訊息框矮一點、字數接近上限才顯示
+withDefaults(defineProps<{ compact?: boolean }>(), { compact: false })
 
 const loading = ref(false)
 const successMessage = ref('')
@@ -310,6 +321,24 @@ onUnmounted(() => {
 .form-group {
   margin-bottom: 1.5rem;
   position: relative;
+}
+
+/* 精簡版：姓名和 Email 並排、欄位間距縮小 */
+.compact .pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.compact .form-group {
+  margin-bottom: 1.1rem;
+}
+
+@media (max-width: 640px) {
+  .compact .pair {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 }
 
 .form-label {

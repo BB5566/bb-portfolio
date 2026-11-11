@@ -97,6 +97,7 @@ services:
     volumes:
       # 持久化資料（重要！）
       - db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       # 備份目錄
       - ./backups:/backups
     environment:

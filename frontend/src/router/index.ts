@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores/admin/auth'
 import { getAppInstance } from '@/app-instance'
 import { loadAdminUI } from '@/plugins/element-plus-admin'
 import NProgress from 'nprogress'
+// 首頁直接打包進主程式，少一輪「下載主程式 → 再下載首頁」的等待
+import HomeProof from '@/views/HomeProof.vue'
 import 'nprogress/nprogress.css'
 
 // 配置 NProgress
@@ -19,7 +21,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/HomeLanding.vue')
+      component: HomeProof,
+      meta: { paper: true } // 紙色頁面：不放深色系統的金色游標與捲動條
     },
     {
       // Portfolio OS 彩蛋：原本的桌面系統首頁
@@ -28,19 +31,23 @@ const router = createRouter({
       component: () => import('@/views/HomeNew.vue')
     },
     {
+      // 印刷打樣版預覽時期的網址，已換成首頁
+      path: '/v5',
+      redirect: '/'
+    },
+    {
       path: '/projects/:id',
       name: 'ProjectDetail',
       component: () => import('@/views/ProjectDetail.vue'),
-      meta: {
-        transition: 'scale'
-      }
+      meta: { paper: true, transition: 'scale' }
     },
     ...adminRoutes,
     // 404 Not Found - 必須放在最後
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      component: () => import('@/views/NotFound.vue')
+      component: () => import('@/views/NotFound.vue'),
+      meta: { paper: true }
     }
   ],
   scrollBehavior(to, _from, _savedPosition) {

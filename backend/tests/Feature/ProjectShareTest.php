@@ -26,13 +26,13 @@ final class ProjectShareTest extends TestCase
 <meta property="og:url" content="https://bb-made.com">
 <meta property="og:title" content="首頁標題">
 <meta property="og:description" content="首頁描述">
-<meta property="og:image" content="https://bb-made.com/og-image-v3.png">
+<meta property="og:image" content="https://bb-made.com/og-image-v5.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:url" content="https://bb-made.com">
 <meta name="twitter:title" content="首頁標題">
 <meta name="twitter:description" content="首頁描述">
-<meta name="twitter:image" content="https://bb-made.com/og-image-v3.png">
+<meta name="twitter:image" content="https://bb-made.com/og-image-v5.png">
 </head><body><div id="app"></div><script type="module" src="/assets/index-abc.js"></script></body></html>
 HTML;
 
@@ -77,5 +77,10 @@ HTML;
         $project->update(['is_published' => false]);
 
         $this->get("/api/v1/share/projects/{$project->id}")->assertNotFound();
+    }
+
+    public function test_project_api_with_text_id_is_404_not_500(): void
+    {
+        $this->getJson('/api/v1/projects/how-i-review-ai-code')->assertNotFound();
     }
 }

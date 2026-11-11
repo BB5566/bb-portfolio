@@ -1,51 +1,60 @@
 <template>
-  <main id="main-content" class="project-detail" v-if="project">
-    <!-- Background Atmosphere -->
-    <div class="detail-atmosphere" aria-hidden="true">
-      <div class="atmosphere-grain"></div>
-      <div class="atmosphere-glow"></div>
-    </div>
+  <!-- 作品頁：跟首頁同一套印刷打樣風格，一件作品是一張打樣 -->
+  <div class="proof-page">
+    <ProofTopbar :resume-url="RESUME_URL">
+      <RouterLink :to="{ name: 'home', hash: '#works' }">← 全部作品</RouterLink>
+    </ProofTopbar>
 
-    <!-- Hero Section -->
-    <section class="project-hero" :class="{ 'project-hero--plain': !heroAsBackground }">
-      <div class="hero-background">
-        <img
-          v-if="heroAsBackground && getHeroImage(project)"
-          :src="getHeroImage(project) ?? undefined"
-          :alt="`${project.title} 專案主視覺`"
-          class="hero-image"
-          loading="eager"
-          fetchpriority="high"
-        />
-        <div class="hero-overlay"></div>
-      </div>
+    <main v-if="project" id="main-content" class="detail">
+      <ProofFrame class="wrap sheet" :folio="folio" label="作品 · WORK">
+        <header class="head">
+          <span v-if="project.category" class="cat">{{ project.category.name }}</span>
+          <h1>{{ project.title }}</h1>
+          <p class="lede">{{ project.description }}</p>
+          <div class="links">
+            <a
+              v-if="project.project_link"
+              :href="project.project_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn primary"
+              @click="trackProjectLinkClick(project.id, 'demo')"
+            >
+              看線上版 ↗
+            </a>
+            <a
+              v-if="project.github_link"
+              :href="project.github_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn"
+              @click="trackProjectLinkClick(project.id, 'github')"
+            >
+              原始碼 ↗
+            </a>
+            <button type="button" class="btn ghost" @click="copyLink">
+              {{ linkCopied ? '已複製 ✓' : '複製連結' }}
+            </button>
+          </div>
+        </header>
 
-      <div class="hero-content">
-        <!-- Back Button -->
-        <button @click="goBack" class="back-btn" type="button">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          <span>返回作品集</span>
-        </button>
+        <!-- 精選作品才有：問題 → 做法 → 結果，放在封面上面，第一眼就看到結果 -->
+        <dl v-if="project.case_study" class="case">
+          <div>
+            <dt>問題</dt>
+            <dd>{{ project.case_study.problem }}</dd>
+          </div>
+          <div>
+            <dt>我怎麼做</dt>
+            <dd>{{ project.case_study.approach }}</dd>
+          </div>
+          <div>
+            <dt>結果</dt>
+            <dd class="result">{{ project.case_study.result }}</dd>
+          </div>
+        </dl>
 
-        <div class="hero-info">
-          <span class="category-badge" v-if="project.category">{{ project.category.name }}</span>
-          <h1 class="project-title">{{ project.title }}</h1>
-        </div>
-      </div>
-    </section>
-
-    <!-- Main Content -->
-    <section class="project-content">
-      <div class="content-container">
-        <figure v-if="!heroAsBackground && getHeroImage(project)" class="cover-card">
+        <figure v-if="getHeroImage(project)" class="cover">
           <img
             :src="getHeroImage(project) ?? undefined"
             :alt="`${project.title} 成果圖`"
@@ -54,339 +63,161 @@
             fetchpriority="high"
           />
         </figure>
-        <div class="content-grid" :class="{ 'content-grid--single': !hasLinks }">
-          <!-- Left: Description -->
-          <div class="description-column">
-            <div class="section-block">
-              <h2 class="section-title">
-                <span class="title-index">01</span>
-                專案描述
-              </h2>
-              <p class="description-text">{{ project.description }}</p>
-            </div>
 
-            <!-- Tech Stack -->
-            <div
-              class="section-block"
-              v-if="project.technologies && project.technologies.length > 0"
-            >
-              <h2 class="section-title">
-                <span class="title-index">02</span>
-                技術架構
-              </h2>
-              <div class="tech-grid">
-                <span v-for="tech in project.technologies" :key="tech" class="tech-item">
-                  {{ tech }}
-                </span>
-              </div>
-            </div>
+        <div class="grid">
+          <section v-if="project.features?.length" class="block">
+            <h2>做了什麼</h2>
+            <ul class="features">
+              <li v-for="(feature, index) in project.features" :key="index">{{ feature }}</li>
+            </ul>
+          </section>
 
-            <!-- Features -->
-            <div class="section-block" v-if="project.features && project.features.length > 0">
-              <h2 class="section-title">
-                <span class="title-index">03</span>
-                功能特色
-              </h2>
-              <ul class="features-list">
-                <li v-for="(feature, index) in project.features" :key="index">
-                  <span class="feature-marker">◇</span>
-                  {{ feature }}
-                </li>
-              </ul>
-            </div>
-
-            <!-- Tags -->
-            <div class="section-block" v-if="project.tags && project.tags.length > 0">
-              <h2 class="section-title">
-                <span class="title-index">04</span>
-                標籤
-              </h2>
-              <div class="tags-list">
-                <span v-for="tag in project.tags" :key="tag.id" class="tag-item">
-                  #{{ tag.name }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Actions -->
-          <div v-if="hasLinks" class="actions-column">
-            <div class="actions-card">
-              <h3 class="actions-title">專案連結</h3>
-
-              <a
-                v-if="project.project_link"
-                :href="project.project_link"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="action-btn primary"
-                @click="trackProjectLinkClick(project.id, 'demo')"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-                <span>查看線上展示</span>
-              </a>
-
-              <a
-                v-if="project.github_link"
-                :href="project.github_link"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="action-btn secondary"
-                @click="trackProjectLinkClick(project.id, 'github')"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path
-                    d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
-                  />
-                </svg>
-                <span>查看原始碼</span>
-              </a>
-
-              <div class="divider"></div>
-
-              <button @click="copyLink" class="action-btn ghost" :class="{ copied: linkCopied }">
-                <svg
-                  v-if="!linkCopied"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-                </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>{{ linkCopied ? '已複製連結' : '複製連結' }}</span>
-              </button>
-            </div>
-          </div>
+          <section v-if="project.technologies?.length" class="block">
+            <h2>技術</h2>
+            <p class="chips">
+              <span v-for="tech in project.technologies" :key="tech">{{ tech }}</span>
+            </p>
+            <template v-if="project.tags?.length">
+              <h2 class="sub">標籤</h2>
+              <p class="chips tags">
+                <span v-for="tag in project.tags" :key="tag.id">#{{ tag.name }}</span>
+              </p>
+            </template>
+          </section>
         </div>
-      </div>
-    </section>
 
-    <!-- Before / After：圖庫裡有「改版前」「改版後」開頭的說明才出現 -->
-    <section v-if="comparePair" class="project-compare">
-      <div class="content-container">
-        <h2 class="gallery-title">
-          <span class="title-ornament">◇</span>
-          改版前後
-          <span class="title-ornament">◇</span>
-        </h2>
-        <BeforeAfter
-          :before="getFullImageUrl(comparePair.before.image_url)"
-          :after="getFullImageUrl(comparePair.after.image_url)"
-          :before-label="comparePair.before.caption ?? '改版前'"
-          :after-label="comparePair.after.caption ?? '改版後'"
-        />
-      </div>
-    </section>
-
-    <!-- Gallery -->
-    <section v-if="project.galleries && project.galleries.length > 1" class="project-gallery">
-      <div class="content-container">
-        <h2 class="gallery-title">
-          <span class="title-ornament">◇</span>
-          專案截圖
-          <span class="title-ornament">◇</span>
-        </h2>
-        <div class="gallery-grid">
-          <div
-            v-for="(image, index) in project.galleries.slice(1)"
-            :key="image.id"
-            class="gallery-item"
-            role="button"
-            tabindex="0"
-            :aria-label="`查看 ${project.title} 截圖 ${index + 1}`"
-            @click="openLightbox(index)"
-            @keydown.enter="openLightbox(index)"
-            @keydown.space.prevent="openLightbox(index)"
-          >
-            <img
-              :src="getFullImageUrl(image.image_url)"
-              :alt="image.caption || `${project.title} 截圖 ${index + 1}`"
-              loading="lazy"
-            />
-            <div class="gallery-overlay">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                <line x1="11" y1="8" x2="11" y2="14" />
-                <line x1="8" y1="11" x2="14" y2="11" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Related Projects -->
-    <section v-if="relatedProjects.length > 0" class="related-projects">
-      <div class="content-container">
-        <h2 class="gallery-title">
-          <span class="title-ornament">◇</span>
-          相關專案
-          <span class="title-ornament">◇</span>
-        </h2>
-        <div class="related-grid">
-          <div
-            v-for="relatedProject in relatedProjects"
-            :key="relatedProject.id"
-            class="related-card"
-            role="button"
-            tabindex="0"
-            :aria-label="`查看專案 ${relatedProject.title}`"
-            @click="navigateToProject(relatedProject.id)"
-            @keydown.enter="navigateToProject(relatedProject.id)"
-            @keydown.space.prevent="navigateToProject(relatedProject.id)"
-          >
-            <div class="related-image-wrapper">
-              <img
-                v-if="getProjectCoverImage(relatedProject)"
-                :src="getProjectCoverImage(relatedProject) ?? undefined"
-                :alt="`${relatedProject.title} 專案預覽圖`"
-                class="related-image"
-              />
-              <div class="related-overlay"></div>
-            </div>
-            <div class="related-content">
-              <h3>{{ relatedProject.title }}</h3>
-              <p>{{ truncate(relatedProject.description, 80) }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Lightbox -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <div
-          v-if="showLightbox"
-          class="lightbox"
-          role="dialog"
-          aria-modal="true"
-          aria-label="專案圖片燈箱"
-          @click="closeLightbox"
-        >
-          <button
-            type="button"
-            class="lightbox-close"
-            aria-label="關閉燈箱"
-            @click.stop="closeLightbox"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="lightbox-nav prev"
-            aria-label="上一張圖片"
-            @click.stop="prevImage"
-            v-if="lightboxIndex > 0"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="lightbox-nav next"
-            aria-label="下一張圖片"
-            @click.stop="nextImage"
-            v-if="project.galleries && lightboxIndex < project.galleries.length - 2"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-          <img
-            v-if="project.galleries && project.galleries[lightboxIndex + 1]"
-            :src="getFullImageUrl(project.galleries?.[lightboxIndex + 1]?.image_url)"
-            :alt="project.galleries?.[lightboxIndex + 1]?.caption || `${project.title} 放大圖 ${lightboxIndex + 1}`"
-            class="lightbox-image"
-            @click.stop
+        <!-- Before / After：圖庫裡有「改版前」「改版後」開頭的說明才出現 -->
+        <section v-if="comparePair" class="block compare">
+          <h2>改版前後</h2>
+          <BeforeAfter
+            :before="getFullImageUrl(comparePair.before.image_url)"
+            :after="getFullImageUrl(comparePair.after.image_url)"
+            :before-label="comparePair.before.caption ?? '改版前'"
+            :after-label="comparePair.after.caption ?? '改版後'"
           />
-          <div class="lightbox-counter" aria-live="polite">
-            {{ lightboxIndex + 1 }} / {{ (project.galleries?.length || 1) - 1 }}
+        </section>
+
+        <section v-if="shots.length" class="block">
+          <h2>截圖</h2>
+          <div class="shots">
+            <button
+              v-for="(image, index) in shots"
+              :key="image.id"
+              type="button"
+              class="shot"
+              :aria-label="`放大 ${project.title} 截圖 ${index + 1}`"
+              @click="openLightbox(index)"
+            >
+              <img
+                :src="getFullImageUrl(image.image_url)"
+                :alt="image.caption || `${project.title} 截圖 ${index + 1}`"
+                loading="lazy"
+              />
+            </button>
           </div>
+        </section>
+      </ProofFrame>
+
+      <!-- 其他作品：同分類優先 -->
+      <section v-if="relatedProjects.length" class="wrap related" aria-labelledby="related-title">
+        <h2 id="related-title">其他作品</h2>
+        <div class="related-grid">
+          <RouterLink
+            v-for="p in relatedProjects"
+            :key="p.id"
+            class="related-card"
+            :to="{ name: 'ProjectDetail', params: { id: p.id } }"
+          >
+            <span class="thumb">
+              <img
+                v-if="getProjectCoverImage(p)"
+                :src="getProjectCoverImage(p) ?? undefined"
+                :alt="`${p.title} 預覽圖`"
+                loading="lazy"
+              />
+            </span>
+            <span class="r-body">
+              <span v-if="p.category" class="cat">{{ p.category.name }}</span>
+              <strong>{{ p.title }}</strong>
+              <span class="r-desc">{{ summarize(p.description) }}</span>
+            </span>
+          </RouterLink>
         </div>
-      </Transition>
-    </Teleport>
-  </main>
+      </section>
 
-  <!-- Loading Skeleton -->
-  <main v-else-if="loading" id="main-content" class="project-detail-skeleton" aria-busy="true">
-    <div class="skeleton-hero"></div>
-    <div class="skeleton-container">
-      <div class="skeleton-header">
-        <div class="skeleton-line title"></div>
-        <div class="skeleton-line meta"></div>
-      </div>
-      <div class="skeleton-content">
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line" style="width: 90%"></div>
-        <div class="skeleton-line" style="width: 95%"></div>
-        <div class="skeleton-line" style="width: 80%"></div>
-      </div>
-    </div>
-  </main>
+      <!-- 燈箱 -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div
+            v-if="showLightbox"
+            class="lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label="專案圖片燈箱"
+            @click="closeLightbox"
+          >
+            <button
+              type="button"
+              class="lb-btn lb-close"
+              aria-label="關閉燈箱"
+              @click.stop="closeLightbox"
+            >
+              ✕
+            </button>
+            <button
+              v-if="lightboxIndex > 0"
+              type="button"
+              class="lb-btn lb-prev"
+              aria-label="上一張圖片"
+              @click.stop="prevImage"
+            >
+              ‹
+            </button>
+            <button
+              v-if="lightboxIndex < shots.length - 1"
+              type="button"
+              class="lb-btn lb-next"
+              aria-label="下一張圖片"
+              @click.stop="nextImage"
+            >
+              ›
+            </button>
+            <img
+              v-if="shots[lightboxIndex]"
+              :src="getFullImageUrl(shots[lightboxIndex]?.image_url)"
+              :alt="shots[lightboxIndex]?.caption || `${project.title} 放大圖 ${lightboxIndex + 1}`"
+              class="lb-image"
+              @click.stop
+            />
+            <div class="lb-counter" aria-live="polite">
+              {{ lightboxIndex + 1 }} / {{ shots.length }}
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+    </main>
 
-  <!-- Not Found -->
-  <main v-else id="main-content" class="not-found-state">
-    <div class="not-found-icon">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-    </div>
-    <h2>找不到專案</h2>
-    <p>此專案可能已被移除或不存在</p>
-    <button @click="goBack" type="button" class="back-btn center">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        aria-hidden="true"
-      >
-        <path d="M19 12H5M12 19l-7-7 7-7" />
-      </svg>
-      <span>返回作品集</span>
-    </button>
-  </main>
+    <!-- 載入中：先佔住版面 -->
+    <main v-else-if="loading" id="main-content" class="detail" aria-busy="true">
+      <div class="wrap skeleton">
+        <span class="sk sk-cat"></span>
+        <span class="sk sk-title"></span>
+        <span class="sk sk-line"></span>
+        <span class="sk sk-line short"></span>
+        <span class="sk sk-cover"></span>
+      </div>
+    </main>
+
+    <!-- 找不到這件作品 -->
+    <main v-else id="main-content" class="detail">
+      <div class="wrap missing">
+        <p class="stamp" aria-hidden="true">缺頁</p>
+        <h1>找不到這件作品</h1>
+        <p>可能已經下架，或網址打錯了。</p>
+        <button type="button" class="btn primary" @click="goBack">← 回到全部作品</button>
+      </div>
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -395,10 +226,14 @@ import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { getFullImageUrl, getProjectCoverImage } from '@/utils/image'
+import { summarize } from '@/utils/summary'
 import { useSEO } from '@/composables/useSEO'
 import { useGtag } from '@/plugins/gtag'
 import type { Project } from '@/types/models'
 import BeforeAfter from '@/components/BeforeAfter.vue'
+import ProofFrame from '@/components/proof/ProofFrame.vue'
+import ProofTopbar from '@/components/proof/ProofTopbar.vue'
+import { RESUME_URL } from '@/components/proof/resume'
 
 const route = useRoute()
 const router = useRouter()
@@ -418,6 +253,15 @@ const project = computed(() => {
   return projectStore.publishedProjects.find((p) => p.id === projectId.value)
 })
 
+// 專案截圖：照 sort_order 排，封面已在上方顯示就不重複
+const shots = computed(() => {
+  const galleries = [...(project.value?.galleries ?? [])].sort(
+    (a, b) => a.sort_order - b.sort_order
+  )
+  const cover = project.value?.cover_image_url
+  return cover ? galleries.filter((g) => g.image_url !== cover) : galleries.slice(1)
+})
+
 // 相關專案（同分類）
 const comparePair = computed(() => {
   const galleries = project.value?.galleries ?? []
@@ -435,14 +279,12 @@ const relatedProjects = computed(() => {
   return [...sameCategory, ...rest].slice(0, 3)
 })
 
-// 設計類封面是照片，適合當頁首背景；其他類封面圖內已有標題，改成在內容區完整顯示
-const heroAsBackground = computed(() => project.value?.category?.slug === 'design')
-
-const hasLinks = computed(() => Boolean(project.value?.project_link || project.value?.github_link))
-
-const truncate = (text: string, length: number) => {
-  return text.length > length ? text.substring(0, length) + '...' : text
-}
+// 右上角頁碼：第幾件 / 共幾件
+const folio = computed(() => {
+  const list = projectStore.publishedProjects
+  const n = list.findIndex((p) => p.id === projectId.value) + 1
+  return n ? `${String(n).padStart(2, '0')} / ${String(list.length).padStart(2, '0')}` : ''
+})
 
 // 獲取主圖（優先 cover_image_url，其次 galleries 第一張）
 const getHeroImage = (proj: Project): string | null => {
@@ -451,11 +293,6 @@ const getHeroImage = (proj: Project): string | null => {
 
 const goBack = () => {
   router.push({ name: 'home', hash: '#works' })
-}
-
-const navigateToProject = (id: number) => {
-  router.push({ name: 'ProjectDetail', params: { id } })
-  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const copyLink = async () => {
@@ -490,7 +327,7 @@ const prevImage = () => {
 }
 
 const nextImage = () => {
-  if (project.value?.galleries && lightboxIndex.value < project.value.galleries.length - 2) {
+  if (lightboxIndex.value < shots.value.length - 1) {
     lightboxIndex.value++
   }
 }
@@ -566,848 +403,455 @@ onUnmounted(() => {
 })
 </script>
 
+<style src="@/components/proof/proof-page.css"></style>
+
 <style scoped>
-/* ============================================
-   PROJECT DETAIL - DUNE AESTHETIC
-   ============================================ */
-
-.project-detail {
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--ink);
+.detail {
   position: relative;
+  z-index: 2;
+  padding-top: 40px;
 }
 
-/* Atmosphere */
-.detail-atmosphere {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+.sheet {
+  --volt: var(--accent); /* 改版前後滑桿是深色系統的元件，金色換成橘色 */
+  padding: 0 0 8px;
 }
 
-.atmosphere-grain {
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.02;
+/* ── 標題區 ── */
+.head {
+  max-width: 820px;
 }
 
-.atmosphere-glow {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 60vh;
-  background: radial-gradient(ellipse at top, rgba(225, 193, 110, 0.05) 0%, transparent 70%);
+.cat {
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  letter-spacing: 0.14em;
+  color: var(--accent-ink);
 }
 
-/* Hero Section */
-.project-hero {
-  position: relative;
-  height: 70vh;
-  min-height: 500px;
+h1 {
+  margin: 8px 0 0;
+  font-size: clamp(30px, 4.4vw, 54px);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 16px 0 0;
+  font-size: var(--fs-lead);
+  line-height: 1.8;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.links {
   display: flex;
-  align-items: flex-end;
-  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
 }
 
-/* 程式類：頁首不放背景圖，高度跟著內容 */
-.project-hero.project-hero--plain {
-  height: auto;
-  min-height: 0;
-  padding-top: 5rem;
-}
-
-.hero-background {
-  position: absolute;
-  inset: 0;
-}
-
-.hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(16, 12, 10, 0.3) 0%,
-    rgba(16, 12, 10, 0.6) 50%,
-    rgba(16, 12, 10, 1) 100%
-  );
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-}
-
-/* Back Button */
-.back-btn {
+.btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: rgba(16, 12, 10, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(225, 193, 110, 0.2);
-  border-radius: 100px;
-  color: var(--pearl);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 2rem;
-}
-
-.back-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-.back-btn:hover {
-  background: rgba(225, 193, 110, 0.1);
-  border-color: var(--volt);
-  color: var(--volt);
-  transform: translateX(-4px);
-}
-
-.back-btn:focus-visible {
-  outline: 2px solid var(--volt);
-  outline-offset: 3px;
-  border-color: var(--volt);
-}
-
-.back-btn:active {
-  transform: translateX(-2px) scale(0.98);
-}
-
-.back-btn.center {
-  margin: 0 auto;
-}
-
-/* Hero Info */
-.hero-info {
-  max-width: 800px;
-}
-
-.category-badge {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: rgba(225, 193, 110, 0.15);
-  border: 1px solid rgba(225, 193, 110, 0.3);
-  border-radius: 100px;
-  color: var(--volt);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 1rem;
-}
-
-.project-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  color: var(--pearl);
-  letter-spacing: 2px;
-  line-height: 1.1;
-  margin-bottom: 1rem;
-}
-
-
-/* Content Section */
-.project-content {
-  position: relative;
-  z-index: 1;
-  padding: 4rem 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 4rem;
-  align-items: start;
-}
-
-.content-grid--single {
-  grid-template-columns: minmax(0, 760px);
-}
-
-.cover-card {
-  margin: 0 0 3rem;
-  max-width: 960px;
-  border: 1px solid rgba(225, 193, 110, 0.15);
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1.5px solid var(--ink);
   border-radius: 12px;
-  overflow: hidden;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-ui);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.cover-card img {
+.btn.primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn.ghost {
+  border-color: var(--rule);
+  color: var(--ink-2);
+}
+
+/* ── 封面：像貼在打樣紙上的一張圖 ── */
+.cover {
+  margin: 32px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: #e9e2d4;
+  box-shadow: 0 18px 40px rgba(21, 22, 26, 0.12);
+}
+
+.cover img {
   display: block;
   width: 100%;
   height: auto;
 }
 
-/* Description Column */
-.section-block {
-  margin-bottom: 3rem;
+/* ── 問題 → 做法 → 結果 ── */
+.case {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin: 32px 0 0;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
 }
 
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.5rem;
-  color: var(--pearl);
-  letter-spacing: 2px;
-  margin-bottom: 1.5rem;
+.case > div {
+  padding: 18px 22px 20px 0;
 }
 
-.title-index {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: var(--volt);
-  opacity: 0.6;
+.case > div + div {
+  padding-left: 22px;
+  border-left: 1px solid var(--rule);
 }
 
-.description-text {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1.0625rem;
-  color: var(--text-secondary);
-  line-height: 1.8;
+.case dt {
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  letter-spacing: 0.12em;
+  color: var(--accent-ink);
 }
 
-/* Tech Grid */
-.tech-grid {
+.case dd {
+  margin: 8px 0 0;
+  font-size: var(--fs-body);
+  line-height: 1.75;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.case dd.result {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── 內文 ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 48px;
+  margin-top: 44px;
+}
+
+/* 小標跟內文在手機上一樣大，靠上面一條墨線分層級 */
+.block h2 {
+  margin: 0 0 14px;
+  padding-top: 12px;
+  border-top: 1.5px solid var(--ink);
+  font-size: var(--fs-lead);
+  font-weight: 900;
+}
+
+.block h2.sub {
+  margin-top: 28px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.features {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: var(--fs-body);
+  line-height: 1.75;
+}
+
+.features li::marker {
+  color: var(--accent-ink);
+}
+
+.chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.tech-item {
-  padding: 0.5rem 1rem;
-  background: rgba(225, 193, 110, 0.1);
-  border: 1px solid rgba(225, 193, 110, 0.2);
-  border-radius: 100px;
-  color: var(--volt);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem;
-}
-
-/* Features List */
-.features-list {
-  list-style: none;
-  padding: 0;
+  gap: 6px;
   margin: 0;
 }
 
-.features-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(225, 193, 110, 0.1);
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.6;
+.chips span {
+  padding: 5px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: #fff;
+  font-size: var(--fs-small);
 }
 
-.features-list li:last-child {
-  border-bottom: none;
+.chips.tags span {
+  background: none;
+  color: var(--ink-2);
 }
 
-.feature-marker {
-  color: var(--volt);
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
+.compare,
+.grid + .block,
+.compare + .block {
+  margin-top: 48px;
 }
 
-/* Tags */
-.tags-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag-item {
-  padding: 0.35rem 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.8rem;
-}
-
-/* Actions Column */
-.actions-card {
-  position: sticky;
-  top: 2rem;
-  padding: 2rem;
-  background: rgba(26, 22, 20, 0.8);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(225, 193, 110, 0.15);
-  border-radius: 16px;
-}
-
-.actions-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.25rem;
-  color: var(--pearl);
-  letter-spacing: 2px;
-  margin-bottom: 1.5rem;
-}
-
-.action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 1rem 1.5rem;
-  border-radius: 100px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 0.75rem;
-  border: none;
-}
-
-.action-btn:focus-visible {
-  outline: 2px solid var(--volt);
-  outline-offset: 3px;
-}
-
-.action-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.action-btn svg {
-  width: 18px;
-  height: 18px;
-}
-
-.action-btn.primary {
-  background: var(--volt);
-  color: var(--ink);
-}
-
-.action-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(225, 193, 110, 0.3);
-}
-
-.action-btn.secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--pearl);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.action-btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: var(--pearl);
-}
-
-.action-btn.ghost {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid rgba(225, 193, 110, 0.2);
-}
-
-.action-btn.ghost:hover {
-  color: var(--volt);
-  border-color: var(--volt);
-}
-
-.action-btn.ghost.copied {
-  background: rgba(39, 174, 96, 0.2);
-  border-color: #27ae60;
-  color: #27ae60;
-}
-
-.divider {
-  height: 1px;
-  background: rgba(225, 193, 110, 0.1);
-  margin: 1.5rem 0;
-}
-
-/* Gallery */
-.project-compare {
-  position: relative;
-  z-index: 1;
-  padding: 4rem 0 0;
-}
-
-.project-compare .content-container {
-  max-width: 1100px;
-}
-
-.project-gallery {
-  position: relative;
-  z-index: 1;
-  padding: 4rem 0;
-  background: rgba(26, 22, 20, 0.5);
-}
-
-.gallery-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  color: var(--pearl);
-  letter-spacing: 4px;
-  margin-bottom: 3rem;
-  text-align: center;
-}
-
-.title-ornament {
-  color: var(--volt);
-  font-size: 0.75rem;
-  opacity: 0.6;
-}
-
-.gallery-grid {
+.shots {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
 }
 
-.gallery-item {
+.shot {
   display: block;
-  position: relative;
-  aspect-ratio: 16/10;
-  border-radius: 12px;
+  padding: 0;
   overflow: hidden;
-  cursor: pointer;
-  border: 1px solid rgba(225, 193, 110, 0.1);
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: #e9e2d4;
+  cursor: zoom-in;
 }
 
-.gallery-item img {
+.shot img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.4s var(--ease);
 }
 
-.gallery-item:hover img {
-  transform: scale(1.05);
+.shot:hover img {
+  transform: scale(1.03);
 }
 
-.gallery-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(16, 12, 10, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+/* ── 其他作品 ── */
+.related {
+  margin-top: 80px;
 }
 
-.gallery-item:hover .gallery-overlay,
-.gallery-item:focus-visible .gallery-overlay {
-  opacity: 1;
-}
-
-.gallery-item:focus-visible {
-  outline: 2px solid var(--volt);
-  outline-offset: 3px;
-}
-
-.gallery-overlay svg {
-  width: 40px;
-  height: 40px;
-  color: var(--volt);
-}
-
-/* Related Projects */
-.related-projects {
-  position: relative;
-  z-index: 1;
-  padding: 4rem 0 6rem;
+.related h2 {
+  margin: 0 0 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-size: var(--fs-lead);
+  font-weight: 900;
 }
 
 .related-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
 }
 
 .related-card {
-  display: block;
-  background: rgba(26, 22, 20, 0.6);
-  border: 1px solid rgba(225, 193, 110, 0.1);
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
 }
 
 .related-card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(225, 193, 110, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(21, 22, 26, 0.12);
 }
 
-.related-card:focus-visible {
-  outline: 2px solid var(--volt);
-  outline-offset: 3px;
-  border-color: var(--volt);
+.thumb {
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: #e9e2d4;
 }
 
-.related-card:active {
-  transform: translateY(-2px) scale(0.99);
-}
-
-.related-image-wrapper {
-  position: relative;
-  aspect-ratio: 16/10;
-  overflow: hidden;
-}
-
-.related-image {
+.thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
 }
 
-.related-card:hover .related-image {
-  transform: scale(1.05);
-}
-
-.related-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 50%, rgba(16, 12, 10, 0.8) 100%);
-}
-
-.related-content {
-  padding: 1.25rem;
-}
-
-.related-content h3 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.25rem;
-  color: var(--pearl);
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
-}
-
-.related-content p {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-/* Lightbox */
-.lightbox {
-  position: fixed;
-  inset: 0;
-  background: rgba(16, 12, 10, 0.98);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 2rem;
-}
-
-.lightbox-image {
-  max-width: 90vw;
-  max-height: 85vh;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.lightbox-close {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.lightbox-close svg {
-  width: 24px;
-  height: 24px;
-  color: white;
-}
-
-.lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: rotate(90deg);
-}
-
-.lightbox-close:focus-visible {
-  outline: 2px solid var(--volt);
-  outline-offset: 3px;
-}
-
-.lightbox-close:active {
-  transform: scale(0.92);
-}
-
-.lightbox-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.lightbox-nav svg {
-  width: 24px;
-  height: 24px;
-  color: white;
-}
-
-.lightbox-nav:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.lightbox-nav:focus-visible {
-  outline: 2px solid var(--volt);
-  outline-offset: 3px;
-}
-
-.lightbox-nav:active {
-  transform: translateY(-50%) scale(0.92);
-}
-
-.lightbox-nav.prev {
-  left: 2rem;
-}
-
-.lightbox-nav.next {
-  right: 2rem;
-}
-
-.lightbox-counter {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* ============================================
-   LOADING SKELETON
-   ============================================ */
-.project-detail-skeleton {
-  width: 100%;
-  padding-bottom: var(--space-3xl);
-}
-
-.skeleton-hero {
-  width: 100%;
-  height: 80vh;
-  min-height: 500px;
-  background: var(--noir-70);
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
-}
-
-.skeleton-container {
-  max-width: 1200px;
-  margin: -10vh auto 0;
-  padding: 0 var(--space-xl);
-  position: relative;
-  z-index: 10;
-}
-
-.skeleton-header {
-  margin-bottom: var(--space-2xl);
-}
-.skeleton-line {
-  height: 20px;
-  background: var(--noir-70);
-  border-radius: 4px;
-  margin-bottom: var(--space-md);
-  width: 100%;
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
-}
-.skeleton-line.title {
-  height: clamp(3rem, 6vw, 5rem);
-  width: 60%;
-  margin-bottom: var(--space-lg);
-}
-.skeleton-line.meta {
-  width: 40%;
-  height: 30px;
-}
-
-@keyframes skeleton-pulse {
-  0% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 0.4;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Loading & Not Found */
-.loading-state,
-.not-found-state {
-  min-height: 100vh;
-  min-height: 100dvh;
+.r-body {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 4px;
+  padding: 14px 16px 18px;
+}
+
+.r-body strong {
+  font-size: var(--fs-body);
+  font-weight: 900;
+}
+
+.r-desc {
+  font-size: var(--fs-small);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* ── 載入中 ── */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sk {
+  display: block;
+  border-radius: 8px;
+  background: #e9e2d4;
+}
+
+.sk-cat {
+  width: 90px;
+  height: 12px;
+}
+
+.sk-title {
+  width: min(560px, 80%);
+  height: 44px;
+}
+
+.sk-line {
+  width: min(760px, 100%);
+  height: 14px;
+}
+
+.sk-line.short {
+  width: min(480px, 70%);
+}
+
+.sk-cover {
+  aspect-ratio: 16 / 9;
+  margin-top: 22px;
+  border-radius: 14px;
+}
+
+/* ── 找不到 ── */
+.missing {
+  padding: 12vh 0 0;
   text-align: center;
-  gap: 1.5rem;
-  background: var(--ink);
-  color: var(--pearl);
 }
 
-.loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 2px solid rgba(225, 193, 110, 0.2);
-  border-top-color: var(--volt);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.stamp {
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 6px 14px;
+  border: 2px solid #d7262d;
+  border-radius: 6px;
+  color: #d7262d;
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.3em;
+  rotate: -6deg;
 }
 
-.not-found-icon svg {
-  width: 64px;
-  height: 64px;
-  color: var(--volt);
-  opacity: 0.5;
+.missing h1 {
+  font-size: clamp(26px, 3.4vw, 40px);
 }
 
-.not-found-state h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 2px;
+.missing p:not(.stamp) {
+  margin: 10px 0 24px;
+  color: var(--ink-2);
 }
 
-.not-found-state p {
-  color: var(--text-muted);
-}
-
-/* Transitions */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .content-grid {
+@media (max-width: 900px) {
+  .case {
     grid-template-columns: 1fr;
-    gap: 2rem;
   }
 
-  .actions-card {
-    position: static;
-  }
-}
-
-@media (max-width: 768px) {
-  .project-hero {
-    height: 60vh;
-    min-height: 400px;
+  .case > div,
+  .case > div + div {
+    padding: 16px 0;
+    border-left: 0;
   }
 
-  .hero-content {
-    padding: 2rem 1rem;
+  .case > div + div {
+    border-top: 1px solid var(--rule);
   }
 
-  .project-title {
-    font-size: 2rem;
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
   }
 
-  .content-container {
-    padding: 0 1rem;
-  }
-
-  .gallery-grid,
   .related-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .lightbox-nav {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+@media (max-width: 640px) {
+  .detail {
+    padding-top: 16px;
   }
 
-  .lightbox-close {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-    top: 1rem;
-    right: 1rem;
+  .sheet {
+    padding-top: 22px; /* 手機的頁碼移到左上，留位置給它 */
   }
+}
 
-  .lightbox-nav.prev {
-    left: 0.75rem;
-  }
+/* ── 燈箱：Teleport 到 body，不在 .proof-page 裡，所以顏色直接寫 ── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  background: rgba(21, 22, 26, 0.92);
+}
 
-  .lightbox-nav.next {
-    right: 0.75rem;
-  }
+.lightbox .lb-image {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+}
 
-  .back-btn {
-    min-height: 44px;
-  }
+.lightbox .lb-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
 
-  .lightbox-nav svg {
-    width: 20px;
-    height: 20px;
-  }
+.lightbox .lb-close {
+  top: 16px;
+  right: 16px;
+  font-size: 18px;
+}
+
+.lightbox .lb-prev {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox .lb-next {
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox .lb-counter {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', Menlo, monospace;
+  font-size: 13px; /* 燈箱吃不到 .proof-page 的變數，對齊 --fs-small */
+  color: rgba(255, 255, 255, 0.7);
 }
 </style>

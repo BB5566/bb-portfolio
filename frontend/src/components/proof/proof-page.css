@@ -1,0 +1,66 @@
+/* 印刷打樣風格的共用底：色票、紙色與紙紋、版心。
+   色彩只在 .proof-page 裡定義，不動全站的深色系統（/os、後台） */
+.proof-page {
+  --paper: #f5f1e9;
+  --ink: #15161a;
+  --ink-2: #5b5e66;
+  --rule: #d9d3c7;
+  --accent: #e8542c;
+  /* 小字和白字按鈕用深一階的橘：紙色底上對比 5:1，過 WCAG AA（原本的橘只有 3.25:1） */
+  --accent-ink: #b93c10;
+  --cy: #00aeef;
+  --mg: #ec008c;
+  --ye: #fff100;
+  --bk: #231f20;
+  --sans: 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --serif: 'Noto Serif TC Claim', 'Songti TC', serif;
+  --latin: 'DM Sans', var(--sans);
+  --mono: 'JetBrains Mono', Menlo, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* 字級只用這幾階（首屏大標另計）。mark 只給 aria-hidden 的打樣標記，要讀的字最小 13px */
+  --fs-big: clamp(28px, 3vw, 44px);
+  --fs-h2: clamp(26px, 2.6vw, 36px);
+  --fs-lead: clamp(16px, 1.25vw, 18px);
+  --fs-body: 16px;
+  --fs-ui: 14px;
+  --fs-small: 13px;
+  --fs-mark: 11px;
+
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 84px;
+  overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.6;
+}
+
+/* 紙紋：一層固定的雜訊，用相乘疊在內容上 */
+.proof-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .5 0 0 0 0 .42 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.proof-page :focus-visible {
+  outline: 2px solid #d7262d;
+  outline-offset: 3px;
+}
+
+/* 版心 */
+.proof-page .wrap {
+  width: min(1240px, 100% - 64px);
+  margin-inline: auto;
+}
+
+@media (max-width: 640px) {
+  .proof-page .wrap {
+    width: calc(100% - 40px);
+  }
+}

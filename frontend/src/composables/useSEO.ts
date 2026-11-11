@@ -26,8 +26,8 @@ export function useSEO() {
     const title = config.title || 'Bob Tsou | 前端工程師・地端 AI 內容產線負責人 作品集'
     const description =
       config.description ||
-      '前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：平台首頁進站下載 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。'
-    const image = config.image || `${baseUrl}/og-image-v3.png`
+      '前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。'
+    const image = config.image || `${baseUrl}/og-image-v5.png`
     const url = config.url || baseUrl
 
     useHead(
@@ -59,6 +59,8 @@ export function useSEO() {
     return {
       '@context': 'https://schema.org',
       '@type': 'Person',
+      // 跟 index.html 裡的靜態 JSON-LD 用同一個 @id，搜尋引擎會當成同一個人
+      '@id': `${baseUrl}/#person`,
       name: profile.name || 'Bob Tsou',
       givenName: 'Bob',
       familyName: 'Tsou',
@@ -97,16 +99,14 @@ export function useSEO() {
     return {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
+      '@id': `${baseUrl}/#website`,
       name: 'Bob Tsou Portfolio',
       alternateName: 'Bob Tsou 前端工程師・地端 AI 內容產線負責人 作品集',
       url: baseUrl,
       description:
-        '前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：平台首頁進站下載 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。',
+        '前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。',
       inLanguage: 'zh-TW',
-      author: {
-        '@type': 'Person',
-        name: 'Bob Tsou'
-      }
+      author: { '@id': `${baseUrl}/#person` }
     }
   }
 

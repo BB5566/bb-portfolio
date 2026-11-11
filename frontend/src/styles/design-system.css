@@ -474,35 +474,3 @@ img {
     scroll-behavior: auto !important;
   }
 }
-
-/* 進場動效（directives/reveal.ts）：.reveal 由 JS 加上才會藏，沒有 JS 或減少動態時內容照常顯示。
-   用獨立的 translate／scale 屬性，不會跟元件自己 hover 時的 transform 打架 */
-:root {
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal {
-  opacity: 0;
-  transition:
-    opacity 0.7s var(--ease-out-expo) var(--reveal-delay, 0ms),
-    translate 0.8s var(--ease-out-expo) var(--reveal-delay, 0ms),
-    scale 0.9s var(--ease-out-expo) var(--reveal-delay, 0ms);
-}
-
-.reveal-rise {
-  translate: 0 24px;
-}
-
-.reveal-left {
-  translate: -16px 0;
-}
-
-.reveal-settle {
-  scale: 0.97;
-}
-
-.reveal.revealed {
-  opacity: 1;
-  translate: none;
-  scale: none;
-}

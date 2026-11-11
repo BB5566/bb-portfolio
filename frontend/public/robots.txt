@@ -1,19 +1,26 @@
 # robots.txt for bb-made.com
+#
+# 這是求職用的作品集，歡迎搜尋引擎與 AI 爬蟲讀取（包含拿來回答問題或訓練）。
+# 只有後台 /admin/ 不開放。每一組都要各寫一次 Disallow：
+# 爬蟲只看最符合自己名字的那一組，不會再套用 User-agent: * 的規則。
 
-# Allow all bots
+# 一般搜尋引擎與其他爬蟲
 User-agent: *
 Allow: /
-
-# Disallow admin pages
 Disallow: /admin/
-Disallow: /admin/*
 
-# Sitemap location
+# AI 爬蟲：明確列出允許
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+Allow: /
+Disallow: /admin/
+
 Sitemap: https://bb-made.com/sitemap.xml
-
-# Common crawlers
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /

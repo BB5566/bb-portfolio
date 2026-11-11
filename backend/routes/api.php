@@ -93,7 +93,8 @@ Route::get('/v1/share/projects/{id}', \App\Http\Controllers\Api\ProjectShareCont
 Route::prefix('v1')->group(function () {
     // Projects
     Route::get('/projects', [ProjectController::class, 'index']);
-    Route::get('/projects/{id}', [ProjectController::class, 'publicShow']);
+    // 只收數字：文字網址（例如舊連結的 slug）回 404，不讓 int 型別錯誤變成 500
+    Route::get('/projects/{id}', [ProjectController::class, 'publicShow'])->whereNumber('id');
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);

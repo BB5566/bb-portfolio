@@ -89,6 +89,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./backups:/backups
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]

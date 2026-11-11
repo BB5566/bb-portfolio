@@ -42,6 +42,14 @@ describe('ContactForm', () => {
       expect(wrapper.find('button[type="submit"]').exists()).toBe(true)
     })
 
+    it('精簡版不顯示主旨、訊息框比較矮', () => {
+      const wrapper = mount(ContactForm, { props: { compact: true } })
+
+      expect(wrapper.find('#subject').exists()).toBe(false)
+      expect(wrapper.find('#message').attributes('rows')).toBe('4')
+      expect(wrapper.find('.char-count').exists()).toBe(false)
+    })
+
     it('應該顯示必填標記', () => {
       const wrapper = mountComponent()
       const requiredMarkers = wrapper.findAll('.required')
