@@ -52,7 +52,7 @@
     <h2 class="readme__h2">## 技術棧</h2>
     <pre class="readme__code">
 frontend  Vue 3 · TypeScript · Vite · Pinia · GSAP
-backend   Laravel 11 · MySQL · 內容正本用程式碼管理
+backend   Laravel 12 · MySQL · 內容正本用程式碼管理
 deploy    Docker · GitHub Actions · NAS 自架 · Cloudflare Tunnel
 quality   ESLint · vue-tsc · Vitest · Lighthouse CI</pre
     >

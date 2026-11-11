@@ -23,6 +23,7 @@ class Profile extends Model
         'role_texts',
         'bio',
         'hero_intro',
+        'hero_proof',
         'email',
         'phone',
         'location',
@@ -53,6 +54,7 @@ class Profile extends Model
         'skills' => 'array',
         'role_texts' => 'array',
         'highlights' => 'array',
+        'hero_proof' => 'array',
     ];
 
     /**

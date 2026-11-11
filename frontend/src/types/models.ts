@@ -9,6 +9,15 @@ export interface ProfileHighlight {
   label: string
 }
 
+/** 印刷打樣首頁（/v5）首屏文案 */
+export interface ProfileHeroProof {
+  claim_lines: string[] // 大標，一個元素一行
+  who: string
+  role: string
+  pitch: string
+  how: string
+}
+
 export interface Profile {
   id: number
   name: string
@@ -19,6 +28,7 @@ export interface Profile {
   role_texts: string[] | null // 打字機效果輪播文字
   bio: string | null
   hero_intro?: string | null // 首屏兩行短自介（沒有就退回 bio）
+  hero_proof?: ProfileHeroProof | null
   email: string | null
   phone: string | null
   location: string | null
@@ -103,6 +113,15 @@ export interface ProjectGallery {
   sort_order: number
 }
 
+/** 首頁精選作品卡：問題 → 做法 → 結果 */
+export interface ProjectCaseStudy {
+  problem: string
+  approach: string
+  result: string
+  demo?: 'pipeline' // 卡片上放「親手跑一次」
+  compare?: { label: string; before: number; after: number; unit: string } // 卡片上放拖曳比較
+}
+
 export interface Project {
   id: number
   title: string
@@ -122,6 +141,7 @@ export interface Project {
   tech_stack?: string[] | null
   technologies?: string[] | null
   features?: string[] | null
+  case_study?: ProjectCaseStudy | null
   is_featured?: boolean
   is_published: boolean
   sort_order: number

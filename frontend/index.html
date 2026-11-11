@@ -7,10 +7,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
+  <!-- 首頁的資料先開始抓，不等 JS 下載完；之後 axios 發同一個網址會直接用這份。
+       放在所有樣式表前面，不然會等樣式表下載完才執行 -->
+  <script>
+    if (location.pathname === '/') {
+      ['profile', 'experiences', 'education', 'projects'].forEach(function (name) {
+        var link = document.createElement('link')
+        link.rel = 'preload'
+        link.as = 'fetch'
+        link.crossOrigin = 'anonymous'
+        link.href = '/api/v1/' + name
+        document.head.appendChild(link)
+      })
+    }
+  </script>
+
   <!-- SEO 核心 Meta Tags -->
   <title>Bob Tsou | 前端工程師・地端 AI 內容產線負責人 作品集</title>
   <meta name="description"
-    content="前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：平台首頁進站下載 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。">
+    content="前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。">
   <meta name="keywords" content="前端工程師,Frontend Engineer,地端 AI,流程自動化,AI 應用,Vue 3,TypeScript,.NET 8,Laravel,Docker,地端 LLM,ComfyUI,作品集,Bob Tsou">
   <meta name="author" content="Bob Tsou">
   <meta name="robots" content="index, follow">
@@ -20,8 +35,8 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bb-made.com">
   <meta property="og:title" content="Bob Tsou | 前端工程師・地端 AI 內容產線負責人 作品集">
-  <meta property="og:description" content="前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：平台首頁進站下載 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。">
-  <meta property="og:image" content="https://bb-made.com/og-image-v3.png">
+  <meta property="og:description" content="前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。">
+  <meta property="og:image" content="https://bb-made.com/og-image-v5.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="zh_TW">
@@ -31,18 +46,50 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://bb-made.com">
   <meta name="twitter:title" content="Bob Tsou | 前端工程師・地端 AI 內容產線負責人 作品集">
-  <meta name="twitter:description" content="前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：平台首頁進站下載 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。">
-  <meta name="twitter:image" content="https://bb-made.com/og-image-v3.png">
+  <meta name="twitter:description" content="前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。">
+  <meta name="twitter:image" content="https://bb-made.com/og-image-v5.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="alternate icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <!-- 結構化資料（JSON-LD）：寫死在 HTML 裡，不跑 JS 的爬蟲（含 AI 爬蟲）也讀得到。
+       頁面載入後 useSEO.ts 會再補上完整版，兩邊用同一個 @id 合併成同一個人／網站 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://bb-made.com/#person",
+        "name": "Bob Tsou",
+        "jobTitle": "前端工程師",
+        "description": "設計出身的前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人。",
+        "url": "https://bb-made.com",
+        "email": "mailto:hello@bb-made.com",
+        "address": { "@type": "PostalAddress", "addressLocality": "新北市", "addressCountry": "TW" },
+        "sameAs": ["https://github.com/BB5566"],
+        "knowsAbout": ["Vue 3", "TypeScript", "Nuxt", "Web Performance", "無障礙設計", "地端 LLM 應用"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://bb-made.com/#website",
+        "name": "Bob Tsou Portfolio",
+        "url": "https://bb-made.com",
+        "inLanguage": "zh-TW",
+        "author": { "@id": "https://bb-made.com/#person" }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Favicon：換圖時改 ?v= 版號（邊緣快取一天、瀏覽器也會快取） -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=20261107c">
+  <link rel="alternate icon" href="/favicon.ico?v=20261107c">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20261107c">
+  <link rel="manifest" href="/site.webmanifest?v=20261107c">
 
   <!-- Theme Color -->
-  <meta name="theme-color" content="#f8cb74">
-  <meta name="msapplication-TileColor" content="#f8cb74">
+  <meta name="theme-color" content="#f5f1e9">
+  <meta name="msapplication-TileColor" content="#f5f1e9">
+  <!-- JS 還沒跑起來前先鋪紙色，首屏不會先閃一下舊的深色底（/os 掛載後由 body 自己蓋成深色） -->
+  <style>html{background:#f5f1e9}</style>
 
   <!-- DNS Prefetch for external resources (analytics) -->
   <link rel="dns-prefetch" href="https://static.cloudflareinsights.com">

@@ -19,6 +19,7 @@ class ProjectResource extends JsonResource
             'cover_image_url' => $this->cover_image ? asset('storage/'.$this->cover_image) : null,
             'technologies' => $this->technologies,
             'features' => $this->features,
+            'case_study' => $this->case_study,
             'is_published' => $this->is_published,
             'sort_order' => $this->sort_order,
             'category' => $this->whenLoaded('category', fn () => [

@@ -150,7 +150,7 @@ const categoriesWithCount = computed(() =>
   projectStore.categories.map((cat) => ({
     ...cat,
     count: projectStore.publishedProjects.filter((p) => p.category_id === cat.id).length
-  }))
+  })).filter((cat) => cat.count > 0)
 )
 
 const activeCategoryName = computed(() => {

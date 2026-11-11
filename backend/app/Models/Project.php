@@ -9,13 +9,14 @@ class Project extends Model
 {
     protected $fillable = [
         'category_id', 'slug', 'title', 'cover_image_url', 'preview_media_url',
-        'description', 'technologies', 'features', 'project_link', 'github_link', 'sort_order', 'is_published',
+        'description', 'technologies', 'features', 'case_study', 'project_link', 'github_link', 'sort_order', 'is_published',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
         'technologies' => 'array',
         'features' => 'array',
+        'case_study' => 'array',
     ];
 
     protected static function booted()
@@ -45,7 +46,7 @@ class Project extends Model
 
     public function galleries()
     {
-        return $this->hasMany(ProjectGallery::class);
+        return $this->hasMany(ProjectGallery::class)->orderBy('sort_order');
     }
 
     public function scopePublished($query)

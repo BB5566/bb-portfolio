@@ -4,13 +4,23 @@
   "description": "Bob Tsou 的前端工程師作品集（兼地端 AI 內容產線負責人）",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fdfaf2",
-  "theme_color": "#f8cb74",
+  "background_color": "#f5f1e9",
+  "theme_color": "#f5f1e9",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/favicon.svg?v=20261107c",
       "sizes": "any",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-192.png?v=20261107c",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png?v=20261107c",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }

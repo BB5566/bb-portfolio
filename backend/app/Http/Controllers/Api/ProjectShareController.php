@@ -38,7 +38,7 @@ final class ProjectShareController extends Controller
         $description = Str::limit(trim((string) preg_replace('/\s+/u', ' ', (string) $project->description)), 150);
         $image = $project->cover_image_url
             ? self::SITE.'/'.ltrim($project->cover_image_url, '/')
-            : self::SITE.'/og-image-v3.png';
+            : self::SITE.'/og-image-v5.png';
 
         $tags = [
             '<title>.*?</title>' => '<title>'.e($title).'</title>',

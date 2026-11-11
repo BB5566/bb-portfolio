@@ -38,4 +38,24 @@ class ProjectSeederTest extends TestCase
 
         $this->assertEquals($originalGalleryIds, $newGalleryIds, 'The seeder should update existing galleries instead of recreating them, preserving their IDs.');
     }
+
+    public function test_featured_projects_have_case_study()
+    {
+        Artisan::call('db:seed', ['--class' => 'ProjectSeeder']);
+
+        // 首頁精選＝有 case_study 的作品，照 sort_order 排
+        $featured = Project::whereNotNull('case_study')->orderBy('sort_order')->get();
+
+        $this->assertSame(
+            ['how-i-review-ai-code', 'ai-content-pipeline', 'student-page-load-optimization'],
+            $featured->pluck('slug')->all()
+        );
+        foreach ($featured as $project) {
+            $this->assertNotEmpty($project->case_study['problem']);
+            $this->assertNotEmpty($project->case_study['approach']);
+            $this->assertNotEmpty($project->case_study['result']);
+        }
+        $this->assertSame('pipeline', $featured->firstWhere('slug', 'ai-content-pipeline')->case_study['demo']);
+        $this->assertSame(3040, $featured->firstWhere('slug', 'student-page-load-optimization')->case_study['compare']['before']);
+    }
 }

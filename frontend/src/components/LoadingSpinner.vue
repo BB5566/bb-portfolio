@@ -1,45 +1,21 @@
 <template>
   <Transition name="fade">
-    <div v-if="isLoading" class="loading-overlay">
-      <div class="loading-container">
-        <!-- Dune-style geometric loader -->
-        <div class="loader-frame">
-          <div class="frame-corner tl"></div>
-          <div class="frame-corner tr"></div>
-          <div class="frame-corner bl"></div>
-          <div class="frame-corner br"></div>
-
-          <!-- Inner rotating element -->
-          <div class="loader-inner">
-            <div class="loader-diamond"></div>
-          </div>
-
-          <!-- Orbiting dots -->
-          <div class="loader-orbit">
-            <span class="orbit-dot"></span>
-            <span class="orbit-dot"></span>
-            <span class="orbit-dot"></span>
-          </div>
+    <div v-if="isLoading" class="loading-overlay" role="status" aria-live="polite">
+      <!-- 紙色打樣：裁切線框住四色色票，依序套印 -->
+      <div class="sheet">
+        <i class="crop tl"></i>
+        <i class="crop tr"></i>
+        <i class="crop bl"></i>
+        <i class="crop br"></i>
+        <div class="swatches" aria-hidden="true">
+          <span class="c"></span>
+          <span class="m"></span>
+          <span class="y"></span>
+          <span class="k"></span>
         </div>
-
-        <!-- Brand name -->
-        <div class="loader-brand">
-          <span
-            class="brand-letter"
-            v-for="(letter, i) in 'BOBTSOU'"
-            :key="i"
-            :style="{ animationDelay: `${i * 0.1}s` }"
-          >
-            {{ letter }}
-          </span>
-        </div>
-
-        <!-- Status text -->
-        <p class="loading-text">
-          <span class="status-dot"></span>
-          INITIALIZING SYSTEM
-        </p>
       </div>
+      <p class="loading-text">打樣中</p>
+      <p class="loading-url">BB-MADE.COM</p>
     </div>
   </Transition>
 </template>
@@ -75,211 +51,132 @@ router.afterEach(() => {
 </script>
 
 <style scoped>
+/* 顏色寫死：載入畫面在 .proof-page 外面，拿不到打樣頁的色票變數 */
 .loading-overlay {
   position: fixed;
   inset: 0;
-  background: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 9999;
-}
-
-.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  justify-content: center;
+  gap: 18px;
+  background: #f5f1e9;
+  color: #15161a;
 }
 
-/* Loader Frame */
-.loader-frame {
-  width: 100px;
-  height: 100px;
+.sheet {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 26px 30px;
 }
 
-.frame-corner {
+.crop {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  border-color: var(--volt);
-  border-style: solid;
-  opacity: 0.6;
+  width: 14px;
+  height: 14px;
+  border: 0 solid #15161a;
 }
 
-.frame-corner.tl {
+.crop.tl {
   top: 0;
   left: 0;
-  border-width: 2px 0 0 2px;
+  border-width: 1.5px 0 0 1.5px;
 }
-.frame-corner.tr {
+
+.crop.tr {
   top: 0;
   right: 0;
-  border-width: 2px 2px 0 0;
+  border-width: 1.5px 1.5px 0 0;
 }
-.frame-corner.bl {
+
+.crop.bl {
   bottom: 0;
   left: 0;
-  border-width: 0 0 2px 2px;
+  border-width: 0 0 1.5px 1.5px;
 }
-.frame-corner.br {
-  bottom: 0;
+
+.crop.br {
   right: 0;
-  border-width: 0 2px 2px 0;
+  bottom: 0;
+  border-width: 0 1.5px 1.5px 0;
 }
 
-/* Inner diamond */
-.loader-inner {
-  width: 40px;
-  height: 40px;
+.swatches {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: rotate-slow 4s linear infinite;
+  gap: 6px;
 }
 
-.loader-diamond {
-  width: 30px;
-  height: 30px;
-  background: transparent;
-  border: 2px solid var(--ibad-blue);
-  transform: rotate(45deg);
-  box-shadow:
-    0 0 20px rgba(0, 164, 204, 0.5),
-    inset 0 0 15px rgba(0, 164, 204, 0.2);
-  animation: pulse-diamond 2s ease-in-out infinite;
+.swatches span {
+  width: 22px;
+  height: 22px;
+  animation: ink 1.2s ease-in-out infinite;
 }
 
-@keyframes rotate-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.swatches .c {
+  background: #00aeef;
 }
 
-@keyframes pulse-diamond {
+.swatches .m {
+  background: #ec008c;
+  animation-delay: 0.15s;
+}
+
+.swatches .y {
+  background: #fff100;
+  animation-delay: 0.3s;
+}
+
+.swatches .k {
+  background: #231f20;
+  animation-delay: 0.45s;
+}
+
+/* 一格一格上墨 */
+@keyframes ink {
   0%,
   100% {
-    box-shadow:
-      0 0 20px rgba(0, 164, 204, 0.5),
-      inset 0 0 15px rgba(0, 164, 204, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 0 40px rgba(0, 164, 204, 0.8),
-      inset 0 0 25px rgba(0, 164, 204, 0.4);
-  }
-}
-
-/* Orbiting dots */
-.loader-orbit {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  animation: rotate-orbit 3s linear infinite;
-}
-
-.orbit-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: var(--volt);
-  box-shadow: 0 0 10px var(--volt);
-}
-
-.orbit-dot:nth-child(1) {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.orbit-dot:nth-child(2) {
-  bottom: 10px;
-  left: 10px;
-}
-.orbit-dot:nth-child(3) {
-  bottom: 10px;
-  right: 10px;
-}
-
-@keyframes rotate-orbit {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
-/* Brand name */
-.loader-brand {
-  display: flex;
-  gap: 0.15em;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 0.2em;
-}
-
-.brand-letter {
-  color: var(--volt);
-  opacity: 0;
-  animation: letter-fade 1.4s ease-in-out infinite;
-}
-
-@keyframes letter-fade {
-  0%,
-  100% {
-    opacity: 0.3;
+    opacity: 0.25;
     transform: translateY(0);
   }
-  50% {
+  40% {
     opacity: 1;
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
 }
 
-/* Loading text */
 .loading-text {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--ibad-blue);
-  animation: blink 1s ease-in-out infinite;
+.loading-text::after {
+  content: '…';
 }
 
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
+.loading-url {
+  margin: 0;
+  font-family: 'JetBrains Mono', Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: #8a8578;
 }
 
-/* Fade transition */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swatches span {
+    animation: none;
+    opacity: 1;
+  }
 }
 </style>

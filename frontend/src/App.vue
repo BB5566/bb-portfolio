@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
+import { useHead } from '@unhead/vue'
 import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import ErrorBoundary from '@/components/ErrorBoundary.vue'
 import CustomCursor from '@/components/CustomCursor.vue'
@@ -10,7 +11,13 @@ import GlobalBackground from '@/components/GlobalBackground.vue'
 const route = useRoute()
 const hasFinePointer =
   typeof window === 'undefined' || !window.matchMedia('(pointer: coarse)').matches
-const showCustomCursor = computed(() => hasFinePointer && !route.path.startsWith('/admin'))
+const isPaper = computed(() => route.meta.paper === true)
+const showCustomCursor = computed(
+  () => hasFinePointer && !route.path.startsWith('/admin') && !isPaper.value
+)
+
+// 紙色頁面捲過頭時露出的底色也要是紙色，不是全站預設的深色
+useHead(() => (isPaper.value ? { bodyAttrs: { style: 'background: #f5f1e9' } } : {}))
 
 // 頁面滾動進度條
 const scrollProgress = ref(0)
@@ -39,6 +46,7 @@ onUnmounted(() => {
 
     <!-- 頁面滾動進度條 -->
     <div
+      v-if="!isPaper"
       class="scroll-progress-bar"
       :style="{ width: scrollProgress + '%' }"
       role="progressbar"
@@ -48,7 +56,8 @@ onUnmounted(() => {
       aria-valuemax="100"
     />
 
-    <GlobalBackground />
+    <!-- 四周壓暗只給深色頁；紙色頁換頁空檔會露出一圈灰 -->
+    <GlobalBackground v-if="!isPaper" />
     <CustomCursor v-if="showCustomCursor" />
     <LoadingSpinner />
     <ErrorBoundary>

@@ -9,7 +9,6 @@ import { log } from '@/utils/logger'
  */
 
 import type { App } from 'vue'
-import type { Router } from 'vue-router'
 
 declare global {
   interface Window {
@@ -20,16 +19,32 @@ declare global {
 
 interface GtagConfig {
   measurementId: string
-  router?: Router
   debug?: boolean
   useZaraz?: boolean
+}
+
+const INTERACTIONS = ['scroll', 'pointerdown', 'touchstart', 'keydown'] as const
+
+/**
+ * 自己的裝置開一次 bb-made.com/?internal=1 就記住（?internal=0 取消），
+ * 之後送出的資料標 traffic_type=internal，GA 的「內部流量」篩選器會把它排除
+ */
+function isInternal(): boolean {
+  try {
+    const flag = new URLSearchParams(window.location.search).get('internal')
+    if (flag === '1') localStorage.setItem('bb-internal', '1')
+    if (flag === '0') localStorage.removeItem('bb-internal')
+    return localStorage.getItem('bb-internal') === '1'
+  } catch {
+    return false // 無痕視窗或封鎖網站資料時讀不到，當成一般訪客
+  }
 }
 
 /**
  * 初始化 Google Analytics
  */
 export function initGoogleAnalytics(config: GtagConfig) {
-  const { measurementId, router, debug = false, useZaraz = false } = config
+  const { measurementId, debug = false, useZaraz = false } = config
 
   // 如果沒有 Measurement ID，不載入 GA
   if (!measurementId || measurementId === 'G-XXXXXXXXXX') {
@@ -39,12 +54,21 @@ export function initGoogleAnalytics(config: GtagConfig) {
     return
   }
 
+  // 自動化瀏覽器（跑分、截圖檢查）不記，免得灌水
+  if (navigator.webdriver || /HeadlessChrome|Lighthouse/.test(navigator.userAgent)) return
+
   // 載入 gtag.js (如果是使用 Cloudflare Zaraz 則跳過，以免阻礙效能且重複發送)
+  // gtag.js 約 130 KB，等訪客第一次捲動、點擊、觸控或按鍵才載入，首屏與跑分不受影響；
+  // 在那之前的事件先排在 dataLayer，載入後一起送出
   if (!useZaraz) {
-    const script = document.createElement('script')
-    script.async = true
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
-    document.head.appendChild(script)
+    const load = () => {
+      INTERACTIONS.forEach((type) => window.removeEventListener(type, load))
+      const script = document.createElement('script')
+      script.async = true
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
+      document.head.appendChild(script)
+    }
+    INTERACTIONS.forEach((type) => window.addEventListener(type, load, { once: true, passive: true }))
   } else if (debug) {
     log.info('[GA4] 偵測到 Cloudflare Zaraz 模式，跳過插入 gtag.js 腳本，保留 dataLayer Event 代理')
   }
@@ -58,30 +82,17 @@ export function initGoogleAnalytics(config: GtagConfig) {
 
   // 配置 GA4
   window.gtag('js', new Date())
+  // 頁面瀏覽交給 GA4「加強型評估」：第一頁由 config 送出，站內換頁靠它監聽網址變化，
+  // 下載 PDF、點外部連結、捲到底也是它自動記，不用自己寫
   window.gtag('config', measurementId, {
-    send_page_view: false, // 手動控制頁面瀏覽追蹤
-    debug_mode: debug
+    debug_mode: debug,
+    ...(isInternal() ? { traffic_type: 'internal' } : {})
   })
 
   if (debug) {
     log.info('[GA4] Google Analytics 已初始化:', measurementId)
   }
 
-  // 整合 Vue Router
-  if (router) {
-    router.afterEach((to) => {
-      // 追蹤頁面瀏覽
-      window.gtag('event', 'page_view', {
-        page_path: to.path,
-        page_title: to.meta.title || document.title,
-        page_location: window.location.href
-      })
-
-      if (debug) {
-        log.info('[GA4] 頁面瀏覽:', to.path)
-      }
-    })
-  }
 }
 
 /**

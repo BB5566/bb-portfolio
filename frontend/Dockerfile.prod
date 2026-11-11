@@ -22,6 +22,8 @@ ARG VITE_BACKEND_URL
 # Set environment variables for build
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://bb-made.com/api/v1}
 ENV VITE_BACKEND_URL=${VITE_BACKEND_URL:-https://bb-made.com}
+# GA4 評估 ID 是公開的（本來就會出現在網頁原始碼），不是密碼
+ENV VITE_GA_MEASUREMENT_ID=G-2VH1ENX4N4
 
 # Build the application
 RUN npm run build
