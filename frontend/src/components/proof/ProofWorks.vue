@@ -4,7 +4,7 @@
       <div class="shead">
         <h2 id="proof-works-title">
           打樣
-          <small>精選 {{ featured.length }} / {{ projects.length }}</small>
+          <small>{{ countLabel }}</small>
         </h2>
         <button
           v-if="others.length"
@@ -18,9 +18,9 @@
         </button>
       </div>
 
-      <!-- 精選三件：問題 → 做法 → 結果，每件帶一個能親手試的東西 -->
+      <!-- 精選：問題 → 做法 → 結果。第一件是橫幅，直接放真實比例的前後對照條；其餘並排 -->
       <div class="cards">
-        <article v-for="p in featured" :key="p.id" class="card">
+        <article v-for="(p, i) in featured" :key="p.id" class="card" :class="{ banner: i === 0 }">
           <div class="cover">
             <img
               v-if="p.cover_image_url"
@@ -32,11 +32,12 @@
             />
           </div>
           <div class="body">
-            <span v-if="p.category" class="cat">{{ p.category.name }}</span>
+            <span class="cat">
+              BB {{ code(p) }}
+              <template v-if="p.category">· {{ p.category.name }}</template>
+            </span>
             <h3>
-              <RouterLink :to="{ name: 'ProjectDetail', params: { id: p.id } }">
-                {{ p.title }}
-              </RouterLink>
+              <RouterLink :to="projectRoute(p)">{{ p.title }}</RouterLink>
             </h3>
             <dl v-if="p.case_study" class="case">
               <dt>問題</dt>
@@ -47,12 +48,18 @@
               <dd class="result">{{ p.case_study.result }}</dd>
             </dl>
             <div v-if="p.technologies?.length" class="tags">
-              <span v-for="t in p.technologies.slice(0, 3)" :key="t">{{ t }}</span>
+              <span v-for="t in p.technologies.slice(0, i === 0 ? 5 : 3)" :key="t">{{ t }}</span>
             </div>
 
-            <SizeCompare v-if="p.case_study?.compare" v-bind="p.case_study.compare" />
-            <div v-else-if="p.case_study?.demo === 'pipeline'" class="act">
+            <template v-if="p.case_study?.compare">
+              <RatioBars v-if="i === 0" v-bind="p.case_study.compare" />
+              <SizeCompare v-else v-bind="p.case_study.compare" />
+            </template>
+
+            <!-- 每張卡都有「看完整做法」；有東西可以親手試的再多一顆 -->
+            <div class="act">
               <button
+                v-if="p.case_study?.demo === 'pipeline'"
                 ref="playButton"
                 type="button"
                 class="act-btn"
@@ -62,20 +69,16 @@
               >
                 ▶ 親手跑一次
               </button>
-            </div>
-            <div v-else-if="p.project_link" class="act">
-              <a class="act-btn ghost" :href="p.project_link" target="_blank" rel="noopener">
+              <a
+                v-else-if="p.project_link"
+                class="act-btn"
+                :href="p.project_link"
+                target="_blank"
+                rel="noopener"
+              >
                 試玩正式站 ↗
               </a>
-            </div>
-            <!-- 沒東西可試的（例如「我怎麼審 AI」）也給一顆，三張卡底部才對齊 -->
-            <div v-else class="act">
-              <RouterLink
-                class="act-btn ghost"
-                :to="{ name: 'ProjectDetail', params: { id: p.id } }"
-              >
-                看完整做法 →
-              </RouterLink>
+              <RouterLink class="act-btn ghost" :to="projectRoute(p)">看完整做法 →</RouterLink>
             </div>
           </div>
         </article>
@@ -104,7 +107,7 @@
       <!-- 其他作品做成色票卡：上面封面、下面白條寫色號式編號與名稱 -->
       <ul v-if="showAll" id="proof-works-all" class="all">
         <li v-for="p in others" :key="p.id">
-          <RouterLink :to="{ name: 'ProjectDetail', params: { id: p.id } }">
+          <RouterLink :to="projectRoute(p)">
             <span class="chip-img">
               <img
                 v-if="p.cover_image_url"
@@ -135,7 +138,9 @@ import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref } from '
 import { RouterLink } from 'vue-router'
 import type { Project } from '@/types/models'
 import { useGtag } from '@/plugins/gtag'
+import { projectRoute } from '@/utils/projectLink'
 import ProofFrame from './ProofFrame.vue'
+import RatioBars from './RatioBars.vue'
 import SizeCompare from './SizeCompare.vue'
 
 const { trackEvent } = useGtag()
@@ -149,10 +154,18 @@ const props = defineProps<{ projects: Project[] }>()
 const featured = computed(() => props.projects.filter((p) => p.case_study))
 const others = computed(() => props.projects.filter((p) => !p.case_study))
 
-// 色票編號照全部作品的順序，兩位數
-const code = (p: Project) => String(props.projects.indexOf(p) + 1).padStart(2, '0')
-
 const showAll = ref(false)
+
+// 編號連續：精選卡先編（01 起），其他作品接著編
+const code = (p: Project) =>
+  String([...featured.value, ...others.value].indexOf(p) + 1).padStart(2, '0')
+
+// 展開後整區就是全部作品，標題跟著換
+const countLabel = computed(() =>
+  showAll.value
+    ? `全部 ${props.projects.length} 件`
+    : `精選 ${featured.value.length} / ${props.projects.length}`
+)
 const playing = ref(false)
 const playButton = ref<HTMLButtonElement[]>()
 const closeButton = ref<HTMLButtonElement>()
@@ -227,6 +240,37 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+}
+
+/* 第一件：橫幅。左邊封面、右邊內容，佔滿一整列 */
+.card.banner {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  border-color: var(--ink);
+}
+
+.banner .cover {
+  flex: 0 0 44%;
+  aspect-ratio: auto;
+  min-height: 320px;
+  border-right: 1px solid var(--rule);
+}
+
+.banner .cover img {
+  object-position: left top;
+}
+
+.banner .body {
+  padding: 28px 32px;
+}
+
+.card.banner h3 {
+  font-size: var(--fs-h2);
+  line-height: 1.25;
+}
+
+.banner .case {
+  margin-top: 14px;
 }
 
 .card {
@@ -327,8 +371,16 @@ onBeforeUnmount(() => {
 }
 
 .act {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: auto;
   padding-top: 16px;
+}
+
+/* 拖曳比較自己會把下面推到底，後面的按鈕列就不用再推 */
+.size-compare + .act {
+  margin-top: 0;
 }
 
 .act-btn {
@@ -493,6 +545,25 @@ onBeforeUnmount(() => {
 @media (max-width: 900px) {
   .cards {
     grid-template-columns: 1fr;
+  }
+
+  .card.banner {
+    flex-direction: column;
+  }
+
+  .banner .cover {
+    flex: none;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    border-right: 0;
+  }
+
+  .banner .body {
+    padding: 20px;
+  }
+
+  .card.banner h3 {
+    font-size: var(--fs-lead);
   }
 
   .all {

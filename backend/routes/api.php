@@ -64,7 +64,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 Route::get('/v1/sitemap', function () {
     $projects = \App\Models\Project::where('is_published', true)
         ->orderBy('sort_order')
-        ->get(['id', 'updated_at']);
+        ->get(['slug', 'updated_at']);
 
     $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
     $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
@@ -75,7 +75,7 @@ Route::get('/v1/sitemap', function () {
     // Projects
     foreach ($projects as $project) {
         $lastmod = $project->updated_at->format('Y-m-d');
-        $xml .= "  <url><loc>https://bb-made.com/projects/{$project->id}</loc><lastmod>{$lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n";
+        $xml .= "  <url><loc>https://bb-made.com/projects/{$project->slug}</loc><lastmod>{$lastmod}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n";
     }
 
     $xml .= '</urlset>';
@@ -83,9 +83,9 @@ Route::get('/v1/sitemap', function () {
     return response($xml, 200, ['Content-Type' => 'application/xml']);
 });
 
-// 作品頁的 HTML（帶這件作品的分享預覽），前端 nginx 把 /projects/{id} 轉來這裡
-Route::get('/v1/share/projects/{id}', \App\Http\Controllers\Api\ProjectShareController::class)
-    ->whereNumber('id');
+// 作品頁的 HTML（帶這件作品的分享預覽），前端 nginx 把 /projects/{slug 或 id} 轉來這裡
+Route::get('/v1/share/projects/{key}', \App\Http\Controllers\Api\ProjectShareController::class)
+    ->where('key', '[A-Za-z0-9-]+');
 
 // ==========================================
 // Public API routes (前台公開)
@@ -93,8 +93,8 @@ Route::get('/v1/share/projects/{id}', \App\Http\Controllers\Api\ProjectShareCont
 Route::prefix('v1')->group(function () {
     // Projects
     Route::get('/projects', [ProjectController::class, 'index']);
-    // 只收數字：文字網址（例如舊連結的 slug）回 404，不讓 int 型別錯誤變成 500
-    Route::get('/projects/{id}', [ProjectController::class, 'publicShow'])->whereNumber('id');
+    // 收英文 slug 或數字 id；其他字元直接 404
+    Route::get('/projects/{key}', [ProjectController::class, 'publicShow'])->where('key', '[A-Za-z0-9-]+');
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);

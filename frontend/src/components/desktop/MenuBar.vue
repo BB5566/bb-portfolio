@@ -37,6 +37,10 @@
             </li>
             <li class="menubar__sep" role="separator"></li>
             <li role="none">
+              <button role="menuitem" type="button" @click="goHome">回到 bb-made.com</button>
+            </li>
+            <li class="menubar__sep" role="separator"></li>
+            <li role="none">
               <button role="menuitem" type="button" @click="closeAllWindows">關閉所有視窗</button>
             </li>
             <li role="none">
@@ -84,11 +88,13 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useDesktopStore } from '@/stores/desktop'
 import { getApp } from './apps'
 
 const desktop = useDesktopStore()
 
+const router = useRouter()
 const menuOpen = ref(false)
 const menuRef = ref<HTMLElement | null>(null)
 
@@ -117,6 +123,12 @@ const pick = (appId: string) => {
   menuOpen.value = false
   const app = getApp(appId)
   desktop.open(appId, { width: app?.width, height: app?.height })
+}
+
+// 離開桌面系統，回到主站首頁
+const goHome = () => {
+  menuOpen.value = false
+  router.push('/')
 }
 
 const closeAllWindows = () => {

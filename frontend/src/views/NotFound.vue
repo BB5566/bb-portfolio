@@ -19,10 +19,14 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useSEO } from '@/composables/useSEO'
 import ProofTopbar from '@/components/proof/ProofTopbar.vue'
 import { RESUME_URL } from '@/components/proof/resume'
 
 const router = useRouter()
+
+// 伺服器已經回 404；這裡把標題與 robots 也換掉，不讓缺頁掛著首頁的標題被收錄
+useSEO().setPageMeta({ title: '找不到這一頁 | Bob Tsou 作品集', noindex: true })
 
 const goBack = () => {
   if (window.history.length > 1) {

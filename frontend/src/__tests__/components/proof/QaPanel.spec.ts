@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import QaPanel from '@/components/proof/QaPanel.vue'
-import { findAnswer } from '@/components/proof/proofQa'
+import { QA, findAnswer } from '@/components/proof/proofQa'
 
 const mountQa = () => mount(QaPanel, { props: { open: true, email: 'hello@bb-made.com' } })
 
@@ -38,7 +38,11 @@ describe('findAnswer', () => {
     expect(findAnswer('學生端效能怎麼做')).toBeUndefined()
   })
 
-  it('能遠端嗎：作品集沒寫，回 null', () => {
-    expect(findAnswer('能遠端嗎？')?.a).toBeNull()
+  it('能遠端嗎：有實際答案，不是「沒提到」', () => {
+    expect(findAnswer('能遠端嗎？')?.a).toContain('遠距與混合型')
+  })
+
+  it('預設題每一題都答得出來', () => {
+    expect(QA.every((x) => x.a && x.source)).toBe(true)
   })
 })

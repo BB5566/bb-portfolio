@@ -111,7 +111,7 @@
             <div :class="['job', jobs.poster]" :style="dur('poster')">
               <span class="n">出圖（ComfyUI／FLUX）</span>
               <span class="r">
-                <span>66s→約 9s</span>
+                <span>改圖 66s→約 9s</span>
                 <span>照做率 70%→86%</span>
               </span>
               <span class="p"><i></i></span>
@@ -730,7 +730,7 @@ button:focus-visible {
   left: -10px;
   bottom: -34px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--fs-mark);
   letter-spacing: 0.1em;
   color: var(--ink);
 }
@@ -774,7 +774,7 @@ button:focus-visible {
   top: 0;
   left: 0;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--fs-mark);
   letter-spacing: 0.14em;
   color: var(--screen-muted);
   text-transform: uppercase;
@@ -791,7 +791,7 @@ button:focus-visible {
 
 .caption {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--fs-small);
   line-height: 1.5;
   color: var(--ink-2);
 }
@@ -849,7 +849,7 @@ button:focus-visible {
   background: var(--accent-ink);
   color: #fff;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--fs-mark);
   font-weight: 600;
 }
 
@@ -876,7 +876,7 @@ button:focus-visible {
 
 .pdf {
   padding: 14px 14px 12px;
-  font-size: 9.5px;
+  font-size: var(--fs-mark);
   line-height: 1.5;
 }
 
@@ -889,18 +889,18 @@ button:focus-visible {
   background: #d7332b;
   color: #fff;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--fs-mark);
 }
 
 .pdf .t {
   margin: 8px 64px 2px 0;
   font-weight: 700;
-  font-size: 10px;
+  font-size: var(--fs-mark);
 }
 
 .pdf .meta {
   margin-bottom: 6px;
-  font-size: 8px;
+  font-size: var(--fs-mark);
   color: #666;
 }
 
@@ -915,7 +915,7 @@ button:focus-visible {
   flex: none;
   font-style: normal;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--fs-mark);
   color: #444;
 }
 
@@ -925,7 +925,7 @@ button:focus-visible {
   gap: 1px 8px;
   margin-top: 4px;
   padding-left: 16px;
-  font-size: 9px;
+  font-size: var(--fs-mark);
 }
 
 .chat {
@@ -934,7 +934,7 @@ button:focus-visible {
   border: 1px solid rgba(243, 239, 230, 0.18);
   border-radius: 12px;
   background: #22242a;
-  font-size: 12px;
+  font-size: var(--fs-small);
   line-height: 1.5;
 }
 
@@ -944,7 +944,7 @@ button:focus-visible {
   gap: 6px;
   margin-bottom: 6px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--fs-mark);
   color: var(--screen-muted);
 }
 
@@ -973,7 +973,7 @@ button:focus-visible {
   background: var(--accent);
   color: #fff;
   font-weight: 900;
-  font-size: 15px;
+  font-size: var(--fs-ui);
   box-shadow: 0 8px 24px rgba(232, 84, 44, 0.3);
   transition: transform 0.15s;
 }
@@ -1003,13 +1003,13 @@ button:focus-visible {
   align-items: center;
   gap: 8px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--fs-ui);
 }
 
 .gate .gt small {
   font-family: var(--mono);
   font-weight: 400;
-  font-size: 10px;
+  font-size: var(--fs-mark);
   color: #dcd6ca;
 }
 
@@ -1017,7 +1017,7 @@ button:focus-visible {
   min-width: 4.5ch;
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--fs-small);
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--screen-muted);
@@ -1041,7 +1041,7 @@ button:focus-visible {
   border: 1px solid rgba(141, 196, 209, 0.3);
   border-radius: 999px;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: var(--fs-mark);
   color: var(--screen-muted);
   transition: all 0.3s;
 }
@@ -1095,7 +1095,7 @@ button:focus-visible {
   gap: 2px 10px;
   padding: 8px 0;
   border-top: 1px dashed rgba(243, 239, 230, 0.2);
-  font-size: 12px;
+  font-size: var(--fs-small);
 }
 
 .job .n {
@@ -1107,7 +1107,7 @@ button:focus-visible {
   align-self: center;
   max-width: 150px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: var(--fs-mark);
   line-height: 1.4;
   text-align: right;
   color: var(--accent-ink);
@@ -1168,7 +1168,7 @@ button:focus-visible {
   border-radius: 8px;
   background: #0d0e12;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: var(--fs-mark);
   line-height: 1.7;
   color: #d9d4c8;
 }
@@ -1219,7 +1219,7 @@ button:focus-visible {
   border-radius: 9px;
   color: var(--screen-text);
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--fs-small);
   transition: transform 0.15s;
 }
 
@@ -1234,7 +1234,7 @@ button:focus-visible {
 }
 
 .ctrl .hint {
-  font-size: 12px;
+  font-size: var(--fs-small);
   color: var(--screen-muted);
 }
 
@@ -1326,7 +1326,7 @@ button:focus-visible {
 
 .word {
   width: min(300px, 100%);
-  font-size: 9.5px;
+  font-size: var(--fs-mark);
   line-height: 1.5;
 }
 
@@ -1337,7 +1337,7 @@ button:focus-visible {
   background: #2b579a;
   color: #fff;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--fs-mark);
 }
 
 .word .wbody {
@@ -1349,14 +1349,14 @@ button:focus-visible {
   justify-content: space-between;
   margin-bottom: 4px;
   font-weight: 700;
-  font-size: 10px;
+  font-size: var(--fs-mark);
 }
 
 .word .h i {
   font-style: normal;
   font-family: var(--mono);
   font-weight: 400;
-  font-size: 8px;
+  font-size: var(--fs-mark);
   color: #2b579a;
 }
 
@@ -1406,7 +1406,7 @@ button:focus-visible {
 
 .word .ans-line {
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: var(--fs-mark);
   color: #2b579a;
 }
 
@@ -1414,7 +1414,7 @@ button:focus-visible {
   margin-top: 8px;
   padding-top: 5px;
   border-top: 1px solid #e4e2da;
-  font-size: 7.5px;
+  font-size: var(--fs-mark);
   line-height: 1.4;
   color: #777;
 }
@@ -1427,7 +1427,7 @@ button:focus-visible {
   background: rgba(255, 255, 255, 0.85);
   color: #1b8a5a;
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: var(--fs-mark);
   transform: rotate(-4deg);
 }
 
@@ -1460,7 +1460,7 @@ button:focus-visible {
 
 .poster .ptxt .big {
   font-weight: 900;
-  font-size: 22px;
+  font-size: var(--fs-lead);
   line-height: 1.15;
   letter-spacing: 0.04em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
@@ -1499,7 +1499,7 @@ button:focus-visible {
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: var(--fs-mark);
 }
 
 .post {
@@ -1509,7 +1509,7 @@ button:focus-visible {
   border-radius: 10px;
   background: #fff;
   color: #111;
-  font-size: 9px;
+  font-size: var(--fs-mark);
 }
 
 .post .ph {
@@ -1553,7 +1553,7 @@ button:focus-visible {
   bottom: 10px;
   color: #fff;
   font-weight: 900;
-  font-size: 13px;
+  font-size: var(--fs-small);
   letter-spacing: 0.1em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
@@ -1562,7 +1562,7 @@ button:focus-visible {
   display: flex;
   gap: 8px;
   padding: 8px 10px 2px;
-  font-size: 11px;
+  font-size: var(--fs-mark);
 }
 
 .post .pc {
@@ -1575,7 +1575,7 @@ button:focus-visible {
 
 .post .pc .note {
   margin-top: 4px;
-  font-size: 8px;
+  font-size: var(--fs-mark);
   color: #888;
 }
 
@@ -1617,7 +1617,7 @@ button:focus-visible {
   }
 
   .in .pdf {
-    font-size: 10px;
+    font-size: var(--fs-mark);
   }
 
   .outs {

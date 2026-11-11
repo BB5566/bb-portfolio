@@ -13,7 +13,7 @@
         <PixelHeart />
         校對稿 Q&amp;A
       </b>
-      <span class="note">回答都是預先寫好的，只用作品集上的內容</span>
+      <span class="note">回答都是預先寫好的，只用作品集與公開履歷上的內容</span>
       <button type="button" aria-label="關閉校對稿" @click="emit('close')">✕</button>
     </div>
 
@@ -68,7 +68,7 @@ const messages = ref<{ q: string; item?: QaItem }[]>([
     item: {
       q: '這是誰的作品集？',
       keywords: [],
-      a: 'Bob Tsou — 設計與電商出身的前端工程師・地端 AI 內容產線負責人。下面選一個問題，或自己打。',
+      a: 'Bob Tsou — 設計與電商出身的前端工程師，一人重建公司的地端 AI 內容產線。下面選一個問題，或自己打。',
       source: '出處：關於我',
       href: '#brief'
     }

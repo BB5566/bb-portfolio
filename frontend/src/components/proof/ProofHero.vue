@@ -31,7 +31,8 @@
         <b>C M Y K</b>
       </span>
 
-      <div class="copy">
+      <!-- 大標佔滿版心；頭像縮成一張貼在第二行行尾的小樣 -->
+      <div class="head">
         <h1 id="proof-claim" class="claim">
           <span
             v-for="plate in PLATES"
@@ -48,37 +49,41 @@
             </span>
           </span>
         </h1>
+
+        <div class="portrait pr" style="--i: 3">
+          <div class="frame" :class="{ ready: halftoneReady }">
+            <img
+              ref="avatarEl"
+              src="/avatar.webp?v=4"
+              :alt="`${name} 像素自畫像`"
+              width="480"
+              height="480"
+              @load="renderHalftone"
+            />
+            <span class="halftone" aria-hidden="true">
+              <canvas
+                v-for="plate in PLATES"
+                :key="plate"
+                :ref="(el) => setCanvas(plate, el)"
+                :class="['plate', plate]"
+              ></canvas>
+            </span>
+          </div>
+          <span class="reg" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="copy">
         <p class="who pr" style="--i: 3">{{ name }} — {{ copy.who }}</p>
         <p v-if="copy.pitch" class="pitch pr" style="--i: 4">{{ copy.pitch }}</p>
-        <p class="how pr" style="--i: 5">{{ copy.how }}</p>
-        <div class="ctas pr" style="--i: 6">
+        <div class="ctas pr" style="--i: 5">
           <a class="btn primary" href="#works">看作品 ↓</a>
           <button type="button" class="btn quick" @click="emit('quick')">60 秒看重點</button>
         </div>
+        <p class="how pr" style="--i: 6">{{ copy.how }}</p>
       </div>
 
-      <div class="portrait pr" style="--i: 3">
-        <div class="frame" :class="{ ready: halftoneReady }">
-          <img
-            ref="avatarEl"
-            src="/avatar.webp?v=4"
-            :alt="`${name} 像素自畫像`"
-            width="480"
-            height="480"
-            @load="renderHalftone"
-          />
-          <span class="halftone" aria-hidden="true">
-            <canvas
-              v-for="plate in PLATES"
-              :key="plate"
-              :ref="(el) => setCanvas(plate, el)"
-              :class="['plate', plate]"
-            ></canvas>
-          </span>
-        </div>
-        <span class="reg" aria-hidden="true"></span>
-      </div>
-
+      <!-- 手機排在 who 下面、頭像上面，不用捲就看得到 -->
       <ul v-if="stats.length" class="stats pr" style="--i: 7" aria-label="亮點數字">
         <li v-for="s in stats" :key="s.value">
           <b>{{ s.value }}</b>
@@ -186,7 +191,7 @@ onBeforeUnmount(() => {
 .proof-hero {
   --mis: 0;
   position: relative;
-  padding: 52px 0 56px;
+  padding: 44px 0 56px;
 }
 
 /* 開場先錯開；對準時 --mis 由 1 滑到 0 */
@@ -253,17 +258,31 @@ onBeforeUnmount(() => {
 .plate {
   transform: translate(calc(var(--mis) * var(--dx, 0px)), calc(var(--mis) * var(--dy, 0px)));
 }
-.plate.c {
-  --dx: -14px;
-  --dy: 5px;
+/* 大標的錯位跟著字級走（em），字放多大錯位比例都一樣 */
+.claim .plate.c {
+  --dx: -0.2em;
+  --dy: 0.075em;
 }
-.plate.m {
-  --dx: 12px;
-  --dy: -4px;
+.claim .plate.m {
+  --dx: 0.18em;
+  --dy: -0.06em;
 }
-.plate.y {
-  --dx: 3px;
-  --dy: 9px;
+.claim .plate.y {
+  --dx: 0.045em;
+  --dy: 0.135em;
+}
+/* 頭像是小張的，錯位用固定的小距離 */
+.halftone .plate.c {
+  --dx: -6px;
+  --dy: 2px;
+}
+.halftone .plate.m {
+  --dx: 5px;
+  --dy: -2px;
+}
+.halftone .plate.y {
+  --dx: 1px;
+  --dy: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -272,12 +291,29 @@ onBeforeUnmount(() => {
   }
 }
 
-/* ── 版面 ── */
+/* ── 版面：大標一整列 → 身分＋按鈕 → 三個數字 → 自介。
+   筆電的可視高度只有 650～800，按鈕與數字要排在自介前面才進得了第一屏 ── */
 .grid {
   display: grid;
   grid-template-columns: 7fr 5fr;
-  gap: 40px 64px;
+  grid-template-areas:
+    'head head'
+    'who ctas'
+    'stats stats'
+    'pitch how';
+  gap: 20px 64px;
   align-items: start;
+}
+
+.head {
+  grid-area: head;
+  position: relative;
+  /* 大標字級：寬度剛好排滿版心，矮螢幕再照高度縮（頭像與錯位都用這個 em） */
+  font-size: clamp(44px, min(11.2vw, 18svh), 160px);
+}
+/* 自介那幾段直接當格線的子項，手機才能重排順序 */
+.copy {
+  display: contents;
 }
 
 .slug {
@@ -399,10 +435,11 @@ onBeforeUnmount(() => {
 .claim {
   margin-top: 0;
   font-family: var(--serif);
-  font-size: clamp(36px, 4.6vw, 66px);
+  font-size: 1em;
   font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
+  line-height: 1.05;
+  letter-spacing: 0;
+  margin-bottom: 0;
   font-feature-settings: 'palt' 1;
   position: relative;
   isolation: isolate;
@@ -456,13 +493,16 @@ onBeforeUnmount(() => {
 }
 
 .who {
-  margin-top: 18px;
+  grid-area: who;
+  align-self: center;
+  margin: 0;
   font-size: var(--fs-lead);
   font-weight: 700;
   text-wrap: pretty;
 }
 .pitch {
-  margin-top: 10px;
+  grid-area: pitch;
+  margin: 8px 0 0;
   font-size: var(--fs-lead);
   line-height: 1.8;
   max-width: 32em;
@@ -470,7 +510,8 @@ onBeforeUnmount(() => {
   text-wrap: pretty;
 }
 .how {
-  margin-top: 14px;
+  grid-area: how;
+  margin: 8px 0 0;
   font-size: var(--fs-body);
   line-height: 1.7;
   max-width: 34em;
@@ -480,7 +521,8 @@ onBeforeUnmount(() => {
 }
 
 .ctas {
-  margin-top: 28px;
+  grid-area: ctas;
+  justify-self: end;
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -512,17 +554,20 @@ onBeforeUnmount(() => {
   color: var(--accent-ink);
 }
 
-/* ── 頭像：網點畫好後蓋掉原圖 ── */
+/* ── 頭像：網點畫好後蓋掉原圖。桌機貼在大標第二行行尾（那一行最短，右邊有空） ── */
 .portrait {
-  position: relative;
+  position: absolute;
+  right: 0;
+  top: 1.02em;
+  width: 1.25em;
 }
 .portrait .reg {
-  right: -32px;
-  top: -32px;
+  right: -9px;
+  top: -9px;
 }
 .frame {
   aspect-ratio: 1 / 1;
-  border-radius: 28px;
+  border-radius: 14%;
   overflow: hidden;
   position: relative;
   background: #f7f3ec;
@@ -545,15 +590,16 @@ onBeforeUnmount(() => {
   mix-blend-mode: multiply;
 }
 
+/* 三個數字：前端一格、AI 一格、規模一格，像打樣單上的檢查欄 */
 .stats {
-  grid-column: 1 / -1;
+  grid-area: stats;
   list-style: none;
   margin: 0;
-  padding: 24px 0 0;
+  padding: 16px 0 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
-  border-top: 1px solid var(--rule);
+  border-top: 1.5px solid var(--ink);
 }
 .stats b {
   display: block;
@@ -569,69 +615,97 @@ onBeforeUnmount(() => {
   display: block;
   font-size: var(--fs-ui);
   color: var(--ink-2);
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 @media (max-width: 900px) {
   .proof-hero {
     padding: 16px 0 48px;
   }
+  /* 單欄：大標 → 身分 → 三個數字 → 按鈕 → 自介 → 頭像 */
   .grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .head {
+    display: contents;
+  }
+  .slug {
+    position: static;
+    transform: none;
+    margin-bottom: 14px;
+    order: 0;
+  }
+  .claim {
+    order: 1;
+    font-size: clamp(34px, 11.2vw, 96px);
+  }
+  .who {
+    order: 2;
+    margin-top: 14px;
+  }
+  .stats {
+    order: 3;
+    margin-top: 16px;
+  }
+  .ctas {
+    order: 4;
+    margin-top: 18px;
+  }
+  .pitch {
+    order: 5;
+    margin-top: 22px;
+  }
+  .how {
+    order: 6;
+    margin-top: 14px;
   }
   .portrait {
-    max-width: 300px;
+    order: 7;
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 200px;
+    margin-top: 28px;
   }
   .portrait .reg,
   .reg-tl,
   .reg-br {
     display: none;
   }
-  .stats {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  .claim {
-    font-size: clamp(26px, 8.4vw, 44px);
-  }
-  .slug {
-    position: static;
-    transform: none;
-    margin-bottom: 16px;
-  }
   .bar {
     bottom: -30px;
   }
 }
 
-/* 平板：頭像左、三個數字右，不讓頭像一個人佔一行、右半邊空著 */
-@media (min-width: 641px) and (max-width: 900px) {
-  .grid {
-    grid-template-columns: minmax(0, 300px) 1fr;
-    column-gap: 40px;
-  }
-  .slug,
-  .copy {
-    grid-column: 1 / -1;
-  }
-  .stats {
-    grid-column: 2;
-    align-self: center;
-    padding-top: 0;
-    border-top: 0;
-  }
-}
-
-/* 手機：主要行動改成滿版單欄，拇指好按、版面也整齊 */
+/* 手機：三個數字直排、每格一條線；兩顆按鈕並排、一樣寬，留高度給數字 */
 @media (max-width: 640px) {
+  .stats {
+    display: block;
+    padding: 0;
+  }
+  .stats li {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stats b {
+    font-size: var(--fs-h2);
+  }
+  .stats span {
+    margin-top: 2px;
+    font-size: var(--fs-small);
+  }
   .ctas {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 10px;
   }
   .ctas .btn {
+    flex: 1;
     justify-content: center;
-    width: 100%;
+    padding: 0 10px;
+    white-space: nowrap;
   }
 }
 </style>

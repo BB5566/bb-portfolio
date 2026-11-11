@@ -11,34 +11,36 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 /**
- * 作品頁 /projects/{id} 的 HTML：拿前端的 index.html，換上這件作品的標題、描述、封面。
+ * 作品頁 /projects/{slug} 的 HTML：拿前端的 index.html，換上這件作品的標題、描述、封面。
+ * 網址收英文 slug 或數字 id（舊連結）；canonical 與 og:url 一律用 slug。
  * LINE、FB、LinkedIn 抓預覽卡片時不跑 JS，所以要在伺服器端就填好；畫面照樣由 Vue 接手。
  */
 final class ProjectShareController extends Controller
 {
     private const SITE = 'https://bb-made.com';
 
-    public function __invoke(int $id): Response
+    public function __invoke(string $key): Response
     {
         $html = Http::timeout(3)
             ->get(config('services.frontend.internal_url').'/index.html')
             ->throw()
             ->body();
 
-        $project = Project::published()->find($id);
+        $project = Project::published()->whereKeyOrSlug($key)->first();
 
         if (! $project) {
             $html = self::replaceTag($html, '<meta name="robots"[^>]*>', '<meta name="robots" content="noindex">');
+            $html = self::replaceTag($html, '<title>.*?</title>', '<title>找不到這件作品 | Bob Tsou 作品集</title>');
 
             return self::htmlResponse($html, 404);
         }
 
-        $url = self::SITE."/projects/{$project->id}";
+        $url = self::SITE."/projects/{$project->slug}";
         $title = "{$project->title} | Bob Tsou 作品集";
         $description = Str::limit(trim((string) preg_replace('/\s+/u', ' ', (string) $project->description)), 150);
         $image = $project->cover_image_url
             ? self::SITE.'/'.ltrim($project->cover_image_url, '/')
-            : self::SITE.'/og-image-v5.png';
+            : self::SITE.'/og-image-v6.png';
 
         $tags = [
             '<title>.*?</title>' => '<title>'.e($title).'</title>',

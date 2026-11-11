@@ -1,8 +1,8 @@
 <template>
   <header class="top">
     <div class="wrap row">
-      <RouterLink class="brand" to="/" aria-label="BOB TSOU 首頁">
-        <!-- 跟頁尾同一個字標；名字在首屏 who 那行與 aria-label -->
+      <RouterLink class="brand" to="/" aria-label="BB-MADE 首頁（Bob Tsou 作品集）">
+        <!-- 跟頁尾同一個字標；aria-label 以畫面上看得到的 BB-MADE 開頭，語音控制才對得到 -->
         <ProofWordmark class="mark" :mis="10" />
       </RouterLink>
       <nav class="nav" aria-label="主選單">

@@ -17,7 +17,8 @@
   --latin: 'DM Sans', var(--sans);
   --mono: 'JetBrains Mono', Menlo, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  /* 字級只用這幾階（首屏大標另計）。mark 只給 aria-hidden 的打樣標記，要讀的字最小 13px */
+  /* 字級只用這幾階（首屏大標另計）。mark 給打樣標記（aria-hidden）與產線示範裡的模擬文件；要讀的字最小 13px。
+     完整規則見 repo 根目錄的 DESIGN.md */
   --fs-big: clamp(28px, 3vw, 44px);
   --fs-h2: clamp(26px, 2.6vw, 36px);
   --fs-lead: clamp(16px, 1.25vw, 18px);
