@@ -17,7 +17,7 @@ final class ProjectShareTest extends TestCase
     // 跟正式 index.html 同樣的寫法（description 換行、og:image 帶尺寸）
     private const INDEX_HTML = <<<'HTML'
 <!DOCTYPE html><html><head>
-<title>Bob Tsou | 實戰型 AI 應用工程師 作品集</title>
+<title>Bob Tsou | 前端工程師・Vue 3 × 地端 AI 作品集</title>
 <meta name="description"
     content="首頁描述">
 <meta name="robots" content="index, follow">
@@ -57,11 +57,27 @@ HTML;
             ->assertSee('<link rel="canonical" href="'.$url.'">', false)
             ->assertSee('<meta property="og:url" content="'.$url.'">', false)
             ->assertSee('<meta property="og:type" content="article">', false)
-            ->assertSee('<meta property="og:image" content="https://bb-made.com/'.ltrim($project->cover_image_url, '/').'">', false)
-            ->assertDontSee('og:image:width', false)
+            ->assertSee('<meta property="og:image:width" content="1200">', false)
+            ->assertSee('<meta property="og:image:height" content="630">', false)
             ->assertDontSee('首頁描述', false)
             // Vue 照樣接手
             ->assertSee('/assets/index-abc.js', false);
+    }
+
+    public function test_share_image_is_jpg_for_every_published_project(): void
+    {
+        // LinkedIn 等平台的預覽卡不保證吃 WebP，分享圖一律是 public/og/{slug}.jpg
+        $projects = Project::published()->get();
+        $this->assertNotEmpty($projects);
+
+        foreach ($projects as $project) {
+            $html = $this->get("/api/v1/share/projects/{$project->slug}")->assertOk()->getContent();
+            $image = preg_quote("https://bb-made.com/og/{$project->slug}.jpg", '#').'\?v=\d{8}[a-z]';
+
+            $this->assertMatchesRegularExpression('#<meta property="og:image" content="'.$image.'">#', $html);
+            $this->assertMatchesRegularExpression('#<meta name="twitter:image" content="'.$image.'">#', $html);
+            $this->assertStringNotContainsString('.webp', $html);
+        }
     }
 
     public function test_missing_project_is_404_and_noindex(): void

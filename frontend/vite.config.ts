@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { projectShareImage } from './src/utils/shareImage'
 
 /**
  * Simple Critical CSS Inlining Plugin
@@ -22,7 +23,7 @@ function simpleCriticalCSSPlugin(): Plugin {
         const fs = await import('fs')
         const path = await import('path')
         const html = await fs.promises.readFile('dist/index.html', 'utf-8')
-        
+
         // Find all <link rel="stylesheet"> in <head>
         const linkMatches = html.match(/<link[^>]*rel="stylesheet"[^>]*>/g) || []
         if (linkMatches.length === 0) {
@@ -59,12 +60,14 @@ function simpleCriticalCSSPlugin(): Plugin {
           console.log('ℹ️ No CSS files matched for inlining')
         }
       } catch (error) {
-        console.warn('⚠️ Critical CSS inlining failed (non-blocking):', error instanceof Error ? error.message : error)
+        console.warn(
+          '⚠️ Critical CSS inlining failed (non-blocking):',
+          error instanceof Error ? error.message : error
+        )
       }
     }
   }
 }
-
 
 /**
  * Phase 2: Design-system CSS Preload Plugin
@@ -128,6 +131,75 @@ function notFoundPagePlugin(): Plugin {
   }
 }
 
+/**
+ * os.html：/os（Portfolio OS 彩蛋頁）由 nginx 送出這一頁。
+ * 內容就是 index.html，只把標題、描述、canonical 與分享卡換成 /os 自己的，
+ * 不跑 JS 的爬蟲與分享預覽才不會拿到首頁那組。文字與 HomeNew.vue 的 setPageMeta 一致。
+ */
+function osPagePlugin(): Plugin {
+  const title = 'Portfolio OS | Bob Tsou 作品集'
+  const description =
+    '作品集的互動版：以桌面作業系統為隱喻，視窗可拖曳、縮放、切換，Finder 可依分類瀏覽作品。'
+  const url = 'https://bb-made.com/os'
+  const image = projectShareImage('portfolio-os')
+
+  return {
+    name: 'os-page',
+    apply: 'build',
+    enforce: 'post',
+    closeBundle: {
+      order: 'post',
+      sequential: true,
+      async handler() {
+        const fs = await import('fs')
+        const html = await fs.promises.readFile('dist/index.html', 'utf-8')
+        const page = html
+          .replace(/<title>.*?<\/title>/s, `<title>${title}</title>`)
+          .replace(
+            /<meta name="description"[^>]*>/s,
+            `<meta name="description" content="${description}">`
+          )
+          .replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${url}">`)
+          .replace(/<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${url}">`)
+          .replace(
+            /<meta property="og:title"[^>]*>/,
+            `<meta property="og:title" content="${title}">`
+          )
+          .replace(
+            /<meta property="og:description"[^>]*>/s,
+            `<meta property="og:description" content="${description}">`
+          )
+          .replace(
+            /<meta property="og:image"[^>]*>/,
+            `<meta property="og:image" content="${image}">`
+          )
+          .replace(/<meta name="twitter:url"[^>]*>/, `<meta name="twitter:url" content="${url}">`)
+          .replace(
+            /<meta name="twitter:title"[^>]*>/,
+            `<meta name="twitter:title" content="${title}">`
+          )
+          .replace(
+            /<meta name="twitter:description"[^>]*>/s,
+            `<meta name="twitter:description" content="${description}">`
+          )
+          .replace(
+            /<meta name="twitter:image"[^>]*>/,
+            `<meta name="twitter:image" content="${image}">`
+          )
+        for (const expected of [
+          `<title>${title}</title>`,
+          `rel="canonical" href="${url}"`,
+          `og:image" content="${image}"`
+        ]) {
+          if (!page.includes(expected)) throw new Error(`os.html 沒有換到：${expected}`)
+        }
+        await fs.promises.writeFile('dist/os.html', page, 'utf-8')
+        console.log('✅ Wrote dist/os.html')
+      }
+    }
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -147,7 +219,8 @@ export default defineConfig({
     // Phase 2: Critical CSS inline + API preconnect (production build only)
     process.env.NODE_ENV === 'production' ? cssPreloadPlugin() : null,
     process.env.NODE_ENV === 'production' ? simpleCriticalCSSPlugin() : null,
-    notFoundPagePlugin()
+    notFoundPagePlugin(),
+    osPagePlugin()
   ],
   resolve: {
     alias: {

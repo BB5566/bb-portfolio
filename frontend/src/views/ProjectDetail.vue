@@ -2,7 +2,8 @@
   <!-- 作品頁：跟首頁同一套印刷打樣風格，一件作品是一張打樣 -->
   <div class="proof-page">
     <ProofTopbar :resume-url="RESUME_URL">
-      <RouterLink :to="{ name: 'home', hash: '#works' }">← 全部作品</RouterLink>
+      <!-- 手機寬度放不下，收進選單（頁尾還有一顆） -->
+      <RouterLink class="hide-sm" :to="{ name: 'home', hash: '#works' }">← 全部作品</RouterLink>
     </ProofTopbar>
 
     <main v-if="project" id="main-content" class="detail">
@@ -240,6 +241,7 @@ import { ref, computed, nextTick, onMounted, onUnmounted, watch, watchEffect } f
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { getFullImageUrl, getProjectCoverImage } from '@/utils/image'
+import { projectShareImage } from '@/utils/shareImage'
 import { firstSentence, summarize } from '@/utils/summary'
 import { projectKey, projectRoute } from '@/utils/projectLink'
 import { useSEO } from '@/composables/useSEO'
@@ -397,13 +399,11 @@ watchEffect(() => {
   }
 
   if (project.value && !loading.value) {
-    const cover = project.value.cover_image_url
-
-    // 跟伺服器端（ProjectShareController）給的一樣：絕對網址、不帶查詢參數
+    // 跟伺服器端（ProjectShareController）給的一樣：分享圖是 JPG，不是 WebP 封面
     setPageMeta({
       title: `${project.value.title} | Bob Tsou 作品集`,
       description: project.value.description,
-      image: cover ? `${SITE_URL}/${cover.replace(/^\//, '')}` : undefined,
+      image: project.value.slug ? projectShareImage(project.value.slug, SITE_URL) : undefined,
       url: `${SITE_URL}/projects/${projectKey(project.value)}`,
       type: 'article'
     })

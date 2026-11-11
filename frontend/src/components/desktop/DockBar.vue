@@ -133,7 +133,7 @@ onUnmounted(() => {
   color: var(--text);
   font-weight: normal;
   box-shadow: none;
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   margin-top: 0.2rem;
   white-space: nowrap;
   overflow: visible;

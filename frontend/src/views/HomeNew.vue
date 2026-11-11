@@ -12,6 +12,7 @@ import DesktopShell from '@/components/desktop/DesktopShell.vue'
 import { useProjectStore } from '@/stores/projects'
 import { useProfileStore } from '@/stores/profile'
 import { useSEO } from '@/composables/useSEO'
+import { projectShareImage } from '@/utils/shareImage'
 
 const SITE_URL = import.meta.env.VITE_APP_URL || 'https://bb-made.com'
 const projectStore = useProjectStore()
@@ -40,7 +41,9 @@ watch(
     // /os 是彩蛋頁，有自己的標題與 canonical，不跟首頁搶
     setPageMeta({
       title: `Portfolio OS | ${profile.name || 'Bob Tsou'} 作品集`,
-      description: profile.meta_description || profile.bio || undefined,
+      description:
+        '作品集的互動版：以桌面作業系統為隱喻，視窗可拖曳、縮放、切換，Finder 可依分類瀏覽作品。',
+      image: projectShareImage('portfolio-os', SITE_URL),
       url: `${SITE_URL}/os`,
       type: 'website'
     })

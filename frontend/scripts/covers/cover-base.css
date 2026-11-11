@@ -1,0 +1,20 @@
+/* 封面圖原始檔共用樣式（紙色印刷打樣）。出圖：headless Chrome 截圖後轉 WebP，
+   例：chrome --headless=new --hide-scrollbars --virtual-time-budget=15000 --window-size=1200,675 --screenshot=cover.png security-cover.html
+   （流程圖用 1600,900），再 cwebp -q 90。中文字型走 Google Fonts，出圖時要連網。 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@900&display=block');
+@font-face{font-family:'Bebas Neue';src:url(../../src/assets/fonts/bebas-neue-latin-400-normal.woff2)}
+@font-face{font-family:'JetBrains Mono';src:url(../../src/assets/fonts/jetbrains-mono-latin-400-normal.woff2)}
+@font-face{font-family:'DM Sans';font-weight:400;src:url(../../src/assets/fonts/dm-sans-latin-400-normal.woff2)}
+@font-face{font-family:'DM Sans';font-weight:700;src:url(../../src/assets/fonts/dm-sans-latin-700-normal.woff2)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow:hidden;background:#f2eee5;color:#15161a;font-family:'DM Sans','Noto Sans TC',sans-serif}
+.crop{position:absolute;width:26px;height:26px;border:0 solid #15161a}
+.crop.tl{left:22px;top:22px;border-right-width:2px;border-bottom-width:2px}
+.crop.tr{right:22px;top:22px;border-left-width:2px;border-bottom-width:2px}
+.crop.bl{left:22px;bottom:22px;border-right-width:2px;border-top-width:2px}
+.crop.br{right:22px;bottom:22px;border-left-width:2px;border-top-width:2px}
+.chips{display:flex}.chips i{width:15.5px;height:14px;display:block}
+.cy{background:#00aeef}.mg{background:#ec008c}.ye{background:#fff100}.bk{background:#231f20}
+.serif{font-family:'Noto Serif TC',serif;font-weight:900}
+.mono{font-family:'JetBrains Mono','Noto Sans TC',monospace}
+.or{color:#d9481f}
