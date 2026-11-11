@@ -362,6 +362,8 @@ onUnmounted(stopDrag)
   .win__bar {
     height: 44px;
     min-height: 44px;
+    /* 紅綠燈的觸控範圍往外多 15px，左邊留一樣寬才不會超出視窗 */
+    padding-left: 15px;
     cursor: default;
   }
 

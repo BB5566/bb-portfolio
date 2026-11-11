@@ -1,7 +1,7 @@
 {
   "name": "Bob Tsou Portfolio",
   "short_name": "BB Portfolio",
-  "description": "Bob Tsou 的前端工程師作品集（兼地端 AI 內容產線負責人）",
+  "description": "Bob Tsou 的前端工程師作品集（Vue 3 × 地端 AI）",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f5f1e9",

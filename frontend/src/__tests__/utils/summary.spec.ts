@@ -22,7 +22,7 @@ describe('summarize', () => {
 
   it('不切在沒關起來的括號裡', () => {
     const text =
-      '主導前端弱掃修補規劃，完成主站前端函式庫升級（jQuery 1.11／2.1→3.5.1、Bootstrap 3→4 相容層，涵蓋 31 頁）並修補 12 項反射型 XSS'
-    expect(summarize(text)).toBe('主導前端弱掃修補規劃，完成主站前端函式庫升級…')
+      '弱掃修補與同事分工，我負責前端函式庫升級與遷移（jQuery 1.11／2.1→3.5.1、Bootstrap 3→4 相容層，涵蓋 31 頁）並主動補修 6 處網址參數反射'
+    expect(summarize(text)).toBe('弱掃修補與同事分工，我負責前端函式庫升級與遷移…')
   })
 })

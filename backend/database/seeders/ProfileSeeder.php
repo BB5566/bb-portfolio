@@ -67,7 +67,7 @@ class ProfileSeeder extends Seeder
                     '設計與行銷' => ['Figma', 'Photoshop', 'Illustrator', 'Google Analytics', '廣告投放'],
                 ],
                 'years_experience' => 7,
-                'projects_delivered' => 14,
+                'projects_delivered' => 15,
                 'hours_training' => 1320, // 泰山職訓 920＋聯成 400
                 // 首屏三個數字（也用在「60 秒看重點」）；教材抓題數字留在作品卡，不放首頁
                 'highlights' => [
@@ -77,7 +77,7 @@ class ProfileSeeder extends Seeder
                     ['value' => '2,100+', 'label' => '平台服務學校數'],
                 ],
                 'meta_title' => 'Bob Tsou | 前端工程師・Vue 3 × 地端 AI 作品集',
-                'meta_description' => '前端工程師（Vue 3 × TypeScript），並一人重建公司的地端 AI 內容產線：官網首頁讀取的資料 2 MB→79 KB、國考題庫自動抓題、內容產製流程自動化。用實際數據做事。',
+                'meta_description' => '前端工程師（Vue 3 × TypeScript），並一人重建公司的地端 AI 內容產線：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。',
             ]
         );
     }
@@ -144,7 +144,7 @@ class ProfileSeeder extends Seeder
                 'location' => '新北市',
                 'end_date' => '2019-02-28',
                 'is_current' => false,
-                'description' => '主導電商賣場建置與品牌視覺設計、建立 CIS 數位視覺系統；負責競品 UI/UX 分析、中國展會佈展與活動企劃。',
+                'description' => '電商賣場建置與品牌視覺設計、建立 CIS 數位視覺系統；負責競品 UI/UX 分析、中國展會佈展與活動企劃。',
                 'achievements' => [],
                 'technologies' => ['Illustrator', 'Photoshop', '電商平台'],
                 'sort_order' => 4,

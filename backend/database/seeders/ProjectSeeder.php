@@ -22,12 +22,12 @@ class ProjectSeeder extends Seeder
 
         $projects = [
             [
-                // 方法論案例：數字都查證過（PR 數截至 2026-11-07；工單 256 筆、根規範 89%、交叉審查規則為 11-07 公司開發機 git 查證）
+                // 方法論案例：數字都查證過（PR 數不寫確切數字與截止日，只寫「超過 50 個」，才不會過期；工單 256 筆、根規範 89%、交叉審查規則為 11-07 公司開發機 git 查證）
                 'slug' => 'how-i-review-ai-code',
                 'title' => '我怎麼審 AI 寫的程式',
                 'category_id' => $ai->id,
                 'cover_image_url' => '/covers/ai-code-review.webp',
-                'description' => 'AI 一天能開好幾個 PR，程式看起來都像對的；它說「完成了、測過了」，不代表真的做了。我的做法是讓 AI 寫，但動手前先訂紅線，寫完再過四道關：機器先擋、換一個模型審、看執行紀錄不看說法、數字上線前重量。這個作品集從 2026/10/23 起，AI 分支合併了 59 個 PR，合併紀錄裡沒有退版。',
+                'description' => 'AI 一天能開好幾個 PR，程式看起來都像對的；它說「完成了、測過了」，不代表真的做了。我的做法是讓 AI 寫，但動手前先訂紅線，寫完再過四道關：機器先擋、換一個模型審、看執行紀錄不看說法、數字上線前重量。這個作品集從 2026/10/23 起，AI 分支合併超過 50 個 PR，合併紀錄裡沒有退版。',
                 'technologies' => ['Claude Code', 'GitHub Actions', 'Vitest', 'ESLint', 'vue-tsc', 'Lighthouse CI', 'Ollama'],
                 'features' => [
                     '動手前先訂紅線：公司主專案的 Claude Code 規範由我起草（根規範約九成由我撰寫），例如「資料庫只能 SELECT」「機密設定檔永不提交」「設定異動要列出改前→改後」；細則由後端主要開發者擴充，4 位開發者在用、累積 250+ 筆工單',
@@ -36,11 +36,11 @@ class ProjectSeeder extends Seeder
                     '看執行紀錄，不看說法：AI 回報做了什麼時，系統附上它實際執行的動作明細，跟說法對不上就標出來；不靠一條條補規則',
                     '數字上線前重量（作品集）：CI 效能分數 70 查下去是量到錯誤提示框，改用同條件前後對照實測，首頁主要內容約 3 秒→1.8 秒才寫上去；履歷數字逐條對原始資料，不是自己做的就拿掉',
                 ],
-                // 首頁精選卡（數字同上方註解，PR 數截至 2026-11-07）
+                // 首頁精選卡（數字同上方註解）
                 'case_study' => [
                     'problem' => 'AI 說「完成了、測過了」，不代表真的做了；它寫的程式看起來都像對的。',
                     'approach' => '動手前先訂紅線，寫完再過四道關：機器先擋、換一個模型審、看執行紀錄不看說法、數字上線前重量。',
-                    'result' => '這個作品集 AI 分支合併 59 個 PR（截至 2026/11/07），合併紀錄裡沒有退版。',
+                    'result' => '這個作品集從 2026/10/23 起，AI 分支合併超過 50 個 PR，合併紀錄裡沒有退版。',
                 ],
                 'project_link' => null,
                 'github_link' => null,
@@ -179,7 +179,7 @@ class ProjectSeeder extends Seeder
                 'technologies' => ['Vue 3', 'CSS 動畫', 'RWD', '效能優化'],
                 'features' => [
                     '1.7 MB GIF → 約 3 KB DOM 動畫',
-                    '兩站各自主色，桌機與手機同步',
+                    '兩站各自主色',
                     '桌機與手機版同步改版',
                     '考試搜尋與快速入口',
                 ],
@@ -198,8 +198,8 @@ class ProjectSeeder extends Seeder
                 'slug' => 'cross-site-security-patching',
                 'title' => '資安弱掃修補與測試基建',
                 'category_id' => $frontend->id,
-                'cover_image_url' => '/covers/security-tests-v2.webp?v=20261108p',
-                'description' => '弱掃修補與同事分工：我負責前端函式庫升級與遷移（jQuery 1.11／2.1→3.5.1、Bootstrap 3→4 相容層，涵蓋 31 頁與站台級共用 bundle），並主動找出報告沒掃到的 6 處網址參數反射一併修補；複測時獨立完成歸因，負責其中一頁的加固，消除誤報來源。此外，在 code review 時主動修補 4 處 IDOR／SQL Injection，並修補 21 個 npm 安全漏洞。為前端 XSS 淨化模組建立 11 個防護測試，並以人為破壞防護確認測試抓得到失效；為近 6 萬行、原本零測試的答題／組卷套件建立測試基建，自己寫了 150+ 個測試。',
+                'cover_image_url' => '/covers/security-tests-v3.webp?v=20261111s',
+                'description' => '弱掃修補與同事分工：我負責前端函式庫升級與遷移（jQuery 1.11／2.1→3.5.1、Bootstrap 3→4 相容層，涵蓋 31 頁與站台級共用 bundle），並主動找出報告沒掃到的 6 處網址參數反射一併修補；複測時獨立完成歸因，負責其中一頁的加固，消除誤報來源。此外，在 code review 時主動修補 4 處 IDOR／SQL Injection，並修補 21 個 npm 安全漏洞。為前端 XSS 淨化模組建立 11 個防護測試，並以人為破壞防護確認測試抓得到失效；為 6 萬多行、原本零測試的答題／組卷套件建立測試基建，自己寫了 150+ 個測試。',
                 'technologies' => ['Vitest', '資安修補', 'GitLab CI', 'jQuery 3.5', 'Bootstrap 4'],
                 'features' => [
                     '主站 31 頁＋共用 bundle 升級到 jQuery 3.5.1／Bootstrap 4',
@@ -211,8 +211,8 @@ class ProjectSeeder extends Seeder
                 'github_link' => null,
                 'sort_order' => 6,
                 'galleries' => [
-                    ['image_url' => '/covers/security-tests-v2.webp?v=20261108p', 'caption' => '封面'],
-                    ['image_url' => '/covers/gallery/security-flow.webp?v=20261108p', 'caption' => '修補流程'],
+                    ['image_url' => '/covers/security-tests-v3.webp?v=20261111s', 'caption' => '封面'],
+                    ['image_url' => '/covers/gallery/security-flow-v2.webp?v=20261111s', 'caption' => '修補流程'],
                 ],
             ],
             [

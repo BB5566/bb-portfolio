@@ -1,6 +1,7 @@
 import { injectHead, useHead } from '@unhead/vue'
 import type { Profile } from '@/services/profileApi'
 import type { Project } from '@/types/models'
+import { projectShareImage } from '@/utils/shareImage'
 
 interface SEOConfig {
   title?: string
@@ -66,7 +67,8 @@ export function useSEO() {
       name: profile.name || 'Bob Tsou',
       givenName: 'Bob',
       familyName: 'Tsou',
-      jobTitle: profile.title || '前端工程師',
+      // 跟 index.html 的靜態版寫同一個職稱，不用 profile.title（那是帶技術關鍵字的長標題）
+      jobTitle: '前端工程師',
       description: profile.bio,
       url: baseUrl,
       image: profile.avatar ? `${baseUrl}${profile.avatar}` : undefined,
@@ -116,9 +118,8 @@ export function useSEO() {
    * 生成專案作品 Schema.org (CreativeWork)
    */
   const generateProjectSchema = (project: Project) => {
-    // 封面圖：網址開頭的 / 拿掉，才不會變成 bb-made.com//covers/…
-    const cover = project.cover_image_url ?? project.galleries?.[0]?.image_url
-    const coverImage = cover ? `${baseUrl}/${cover.replace(/^\//, '')}` : undefined
+    // 跟 og:image 用同一張 JPG 分享圖
+    const coverImage = project.slug ? projectShareImage(project.slug, baseUrl) : undefined
 
     return {
       '@context': 'https://schema.org',

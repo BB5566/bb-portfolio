@@ -11,13 +11,17 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 /**
- * 作品頁 /projects/{slug} 的 HTML：拿前端的 index.html，換上這件作品的標題、描述、封面。
+ * 作品頁 /projects/{slug} 的 HTML：拿前端的 index.html，換上這件作品的標題、描述、分享圖。
+ * og:image:width／height 沿用 index.html 的 1200×630（分享圖都是這個尺寸）。
  * 網址收英文 slug 或數字 id（舊連結）；canonical 與 og:url 一律用 slug。
  * LINE、FB、LinkedIn 抓預覽卡片時不跑 JS，所以要在伺服器端就填好；畫面照樣由 Vue 接手。
  */
 final class ProjectShareController extends Controller
 {
     private const SITE = 'https://bb-made.com';
+
+    // 分享圖 public/og/{slug}.jpg 的版號：重出圖片就換，前端 src/utils/shareImage.ts 也要一起換（邊緣快取一天）
+    private const OG_VERSION = '20261111a';
 
     public function __invoke(string $key): Response
     {
@@ -38,9 +42,8 @@ final class ProjectShareController extends Controller
         $url = self::SITE."/projects/{$project->slug}";
         $title = "{$project->title} | Bob Tsou 作品集";
         $description = Str::limit(trim((string) preg_replace('/\s+/u', ' ', (string) $project->description)), 150);
-        $image = $project->cover_image_url
-            ? self::SITE.'/'.ltrim($project->cover_image_url, '/')
-            : self::SITE.'/og-image-v6.png';
+        // 分享圖用 1200×630 的 JPG，不用 WebP 封面：LinkedIn 等平台的預覽卡不保證會顯示 WebP
+        $image = self::SITE."/og/{$project->slug}.jpg?v=".self::OG_VERSION;
 
         $tags = [
             '<title>.*?</title>' => '<title>'.e($title).'</title>',
@@ -51,8 +54,6 @@ final class ProjectShareController extends Controller
             '<meta property="og:title"[^>]*>' => '<meta property="og:title" content="'.e($title).'">',
             '<meta property="og:description"[^>]*>' => '<meta property="og:description" content="'.e($description).'">',
             '<meta property="og:image"[^>]*>' => '<meta property="og:image" content="'.e($image).'">',
-            // 首頁卡片是 1200×630，作品封面尺寸不一，不寫死
-            '<meta property="og:image:(?:width|height)"[^>]*>\s*' => '',
             '<meta name="twitter:url"[^>]*>' => '<meta name="twitter:url" content="'.e($url).'">',
             '<meta name="twitter:title"[^>]*>' => '<meta name="twitter:title" content="'.e($title).'">',
             '<meta name="twitter:description"[^>]*>' => '<meta name="twitter:description" content="'.e($description).'">',

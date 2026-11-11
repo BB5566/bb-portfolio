@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><link rel="stylesheet" href="cover-base.css"><style>
+html,body{width:1600px;height:900px}
+.crop{width:28px;height:28px}
+.chips{position:absolute;left:64px;top:56px}
+h1{position:absolute;left:64px;top:84px;font-size:36px;letter-spacing:.02em}
+.sub{position:absolute;left:64px;top:142px;font-size:19px;color:#5b5e66}
+.col{position:absolute;top:212px}
+.col>h2{font-size:15px;font-weight:500;letter-spacing:.14em;color:#3a3c42;margin-bottom:26px}
+.box{background:#fcfbf8;border:1.5px solid #15161a;padding:20px 22px;margin-bottom:16px}
+.box.hl{border-width:2px;box-shadow:5px 5px 0 #d9481f}
+.box h3{font-size:21px;font-weight:700;margin-bottom:10px}
+.box.hl h3{color:#d9481f}
+.box p{font-size:16.5px;line-height:1.5;color:#3a3c42}
+.box p b{color:#d9481f;font-weight:700}
+.arrow{position:absolute;top:388px;font-size:34px;color:#d9481f;font-family:'DM Sans'}
+.extra{position:absolute;left:64px;right:64px;top:680px;height:138px;border:1.5px solid #15161a;background:#fcfbf8;padding:20px 22px;display:grid;grid-template-columns:230px 1fr 1fr 260px;gap:28px}
+.extra h3{font-size:19px;font-weight:700;margin-bottom:8px}
+.extra p{font-size:16.5px;line-height:1.5;color:#3a3c42}
+.extra p b{color:#d9481f}
+.extra .lead h3{font-size:21px}
+.extra>div+div{border-left:1.5px solid #d9d3c7;padding-left:28px}
+</style></head><body>
+<i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
+<span class="chips"><i class="cy"></i><i class="mg"></i><i class="ye"></i><i class="bk"></i></span>
+<h1 class="serif">資安弱掃修補 <span class="or">流程</span></h1>
+<div class="sub">與同事分工｜我負責前端函式庫升級與遷移｜另外補上測試</div>
+
+<div class="col" style="left:64px;width:230px"><h2>起點</h2>
+<div class="box" style="height:300px"><h3>弱掃報告</h3><p>弱點掃描結果<br>與同事分工修補</p></div></div>
+<div class="arrow" style="left:312px">→</div>
+
+<div class="col" style="left:374px;width:450px"><h2>弱掃修補（我的部分）</h2>
+<div class="box hl"><h3>函式庫升級與遷移</h3><p>主站 <b>31 頁</b>＋站台級共用 bundle<br>jQuery 1.11 / 2.1 → 3.5.1、Bootstrap 3 → 4 相容層</p></div>
+<div class="box hl"><h3>網址參數反射</h3><p>主動補修報告沒掃到的 <b>6 處</b></p></div></div>
+<div class="arrow" style="left:846px">→</div>
+
+<div class="col" style="left:908px;width:320px"><h2>複測（與同事分工）</h2>
+<div class="box" style="height:300px"><h3>複測歸因</h3><p>獨立完成歸因<br>負責<b>一頁</b>加固<br>消除誤報來源</p></div></div>
+
+<div class="col" style="left:1312px;width:224px"><h2>另外補的測試</h2>
+<div class="box hl"><h3>XSS 防護測試</h3><p>淨化模組 <b>11 個</b>測試<br>故意破壞防護<br>確認測試抓得到</p></div>
+<div class="box hl" style="padding-right:10px"><h3>測試基建</h3><p>6 萬多行、零測試的<br>答題 / 組卷套件<br>自己寫了 <b>150+ 個</b>測試</p></div></div>
+
+<div class="extra">
+<div class="lead"><h3>弱掃之外</h3><p>另外做的修補</p></div>
+<div><h3>權限與注入</h3><p>code review 時主動修補 <b>4 處</b><br>IDOR / SQL Injection</p></div>
+<div><h3>npm 套件</h3><p>修補 <b>21 個</b>安全漏洞</p></div>
+<div><h3>工具</h3><p>Vitest · npm audit</p></div>
+</div>
+</body></html>

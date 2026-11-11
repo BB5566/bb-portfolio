@@ -13,7 +13,7 @@
         <PixelHeart />
         校對稿 Q&amp;A
       </b>
-      <span class="note">回答都是預先寫好的，只用作品集與公開履歷上的內容</span>
+      <span class="note">回答都是預先寫好的，只用作品集與公開求職檔案上的內容</span>
       <button type="button" aria-label="關閉校對稿" @click="emit('close')">✕</button>
     </div>
 
