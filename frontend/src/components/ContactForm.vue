@@ -7,13 +7,14 @@
       <label for="name" class="form-label">
         <LucideIcon name="User" :size="16" />
         姓名
-        <span class="required">*</span>
+        <span class="required" aria-hidden="true">*</span>
       </label>
       <input
         id="name"
         v-model="formData.name"
         type="text"
         autocomplete="name"
+        aria-required="true"
         class="form-input"
         :class="{ error: errors.name }"
         placeholder="請輸入您的姓名"
@@ -31,7 +32,7 @@
       <label for="email" class="form-label">
         <LucideIcon name="Mail" :size="16" />
         電子郵件
-        <span class="required">*</span>
+        <span class="required" aria-hidden="true">*</span>
       </label>
       <input
         id="email"
@@ -39,6 +40,7 @@
         type="email"
         autocomplete="email"
         inputmode="email"
+        aria-required="true"
         class="form-input"
         :class="{ error: errors.email }"
         placeholder="your@email.com"
@@ -81,7 +83,7 @@
       <label for="message" class="form-label">
         <LucideIcon name="MessageCircle" :size="16" />
         訊息內容
-        <span class="required">*</span>
+        <span class="required" aria-hidden="true">*</span>
       </label>
       <textarea
         id="message"
@@ -91,6 +93,7 @@
         placeholder="請輸入您想說的話..."
         :rows="compact ? 4 : 6"
         maxlength="5000"
+        aria-required="true"
         :disabled="loading"
         @blur="markTouched('message')"
         @input="onFieldInput('message')"

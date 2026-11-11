@@ -127,7 +127,7 @@ watch(
   (p) => {
     if (!p) return
     setPageMeta({
-      title: `${p.name || 'Bob Tsou'} | 前端工程師・地端 AI 內容產線負責人 作品集`,
+      title: `${p.name || 'Bob Tsou'} | 前端工程師・Vue 3 × 地端 AI 作品集`,
       description: p.meta_description || p.bio || undefined,
       type: 'website'
     })

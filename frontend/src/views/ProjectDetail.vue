@@ -10,7 +10,8 @@
         <header class="head">
           <span v-if="project.category" class="cat">{{ project.category.name }}</span>
           <h1>{{ project.title }}</h1>
-          <p class="lede">{{ project.description }}</p>
+          <!-- 有「問題／做法／結果」的作品，開頭只留第一句，不跟下面重複 -->
+          <p class="lede">{{ lede }}</p>
           <div class="links">
             <a
               v-if="project.project_link"
@@ -118,6 +119,18 @@
         </section>
       </ProofFrame>
 
+      <!-- 上一件／下一件：照首頁的作品順序 -->
+      <nav v-if="prevProject || nextProject" class="wrap pager" aria-label="上一件與下一件作品">
+        <RouterLink v-if="prevProject" class="pager-link prev" :to="projectRoute(prevProject)">
+          <span class="dir">← 上一件</span>
+          <strong>{{ prevProject.title }}</strong>
+        </RouterLink>
+        <RouterLink v-if="nextProject" class="pager-link next" :to="projectRoute(nextProject)">
+          <span class="dir">下一件 →</span>
+          <strong>{{ nextProject.title }}</strong>
+        </RouterLink>
+      </nav>
+
       <!-- 其他作品：同分類優先 -->
       <section v-if="relatedProjects.length" class="wrap related" aria-labelledby="related-title">
         <h2 id="related-title">其他作品</h2>
@@ -126,7 +139,7 @@
             v-for="p in relatedProjects"
             :key="p.id"
             class="related-card"
-            :to="{ name: 'ProjectDetail', params: { id: p.id } }"
+            :to="projectRoute(p)"
           >
             <span class="thumb">
               <img
@@ -157,6 +170,7 @@
             @click="closeLightbox"
           >
             <button
+              ref="lightboxClose"
               type="button"
               class="lb-btn lb-close"
               aria-label="關閉燈箱"
@@ -222,11 +236,12 @@
 
 <script setup lang="ts">
 import { log } from '@/utils/logger'
-import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { getFullImageUrl, getProjectCoverImage } from '@/utils/image'
-import { summarize } from '@/utils/summary'
+import { firstSentence, summarize } from '@/utils/summary'
+import { projectKey, projectRoute } from '@/utils/projectLink'
 import { useSEO } from '@/composables/useSEO'
 import { useGtag } from '@/plugins/gtag'
 import type { Project } from '@/types/models'
@@ -247,11 +262,28 @@ const lightboxIndex = ref(0)
 const linkCopied = ref(false)
 
 const SITE_URL = import.meta.env.VITE_APP_URL || 'https://bb-made.com'
-const projectId = computed(() => Number(route.params.id))
+// 網址上的代稱：英文 slug（正式網址）或數字 id（舊連結）
+const projectParam = computed(() => String(route.params.id))
 
 const project = computed(() => {
-  return projectStore.publishedProjects.find((p) => p.id === projectId.value)
+  const key = projectParam.value
+  return projectStore.publishedProjects.find((p) => p.slug === key || String(p.id) === key)
 })
+
+const lede = computed(() => {
+  const p = project.value
+  if (!p) return ''
+  return p.case_study ? firstSentence(p.description) : p.description
+})
+
+// 上一件／下一件
+const projectIndex = computed(() =>
+  project.value ? projectStore.publishedProjects.indexOf(project.value) : -1
+)
+const prevProject = computed(() => projectStore.publishedProjects[projectIndex.value - 1])
+const nextProject = computed(() =>
+  projectIndex.value === -1 ? undefined : projectStore.publishedProjects[projectIndex.value + 1]
+)
 
 // 專案截圖：照 sort_order 排，封面已在上方顯示就不重複
 const shots = computed(() => {
@@ -282,7 +314,7 @@ const relatedProjects = computed(() => {
 // 右上角頁碼：第幾件 / 共幾件
 const folio = computed(() => {
   const list = projectStore.publishedProjects
-  const n = list.findIndex((p) => p.id === projectId.value) + 1
+  const n = projectIndex.value + 1
   return n ? `${String(n).padStart(2, '0')} / ${String(list.length).padStart(2, '0')}` : ''
 })
 
@@ -309,15 +341,24 @@ const copyLink = async () => {
   }
 }
 
-const openLightbox = (index: number) => {
+// 燈箱開啟時焦點移到關閉鈕，關掉後還給原本按的那張縮圖
+const lightboxClose = ref<HTMLButtonElement>()
+let lightboxOpener: HTMLElement | null = null
+
+const openLightbox = async (index: number) => {
+  lightboxOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null
   lightboxIndex.value = index
   showLightbox.value = true
   document.body.style.overflow = 'hidden'
+  await nextTick()
+  lightboxClose.value?.focus()
 }
 
 const closeLightbox = () => {
   showLightbox.value = false
   document.body.style.overflow = ''
+  lightboxOpener?.focus()
+  lightboxOpener = null
 }
 
 const prevImage = () => {
@@ -350,6 +391,11 @@ const trackedId = ref<number | null>(null)
 
 // 設定 SEO 與 追蹤 (響應式監聽)
 watchEffect(() => {
+  if (!project.value && !loading.value) {
+    // 找不到：伺服器已回 404，這裡把標題與 robots 也換掉
+    setPageMeta({ title: '找不到這件作品 | Bob Tsou 作品集', noindex: true })
+  }
+
   if (project.value && !loading.value) {
     const cover = project.value.cover_image_url
 
@@ -358,7 +404,7 @@ watchEffect(() => {
       title: `${project.value.title} | Bob Tsou 作品集`,
       description: project.value.description,
       image: cover ? `${SITE_URL}/${cover.replace(/^\//, '')}` : undefined,
-      url: `${SITE_URL}/projects/${project.value.id}`,
+      url: `${SITE_URL}/projects/${projectKey(project.value)}`,
       type: 'article'
     })
 
@@ -375,7 +421,8 @@ watchEffect(() => {
 
 // 路由重入（同元件不同 params.id）時 onMounted 不會再觸發，
 // 需手動重置殘留的燈箱/捲動/複製狀態，避免顯示上一個專案的狀態
-watch(projectId, () => {
+watch(projectParam, () => {
+  lightboxOpener = null
   showLightbox.value = false
   lightboxIndex.value = 0
   linkCopied.value = false
@@ -624,9 +671,52 @@ h1 {
   transform: scale(1.03);
 }
 
+/* ── 上一件／下一件 ── */
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 56px;
+}
+
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.pager-link:hover strong {
+  text-decoration: underline;
+}
+
+.pager-link.next {
+  grid-column: 2;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.pager .dir {
+  font-family: var(--latin);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-ink);
+}
+
+.pager strong {
+  font-size: var(--fs-body);
+  line-height: 1.4;
+}
+
 /* ── 其他作品 ── */
 .related {
-  margin-top: 80px;
+  margin-top: 56px;
 }
 
 .related h2 {

@@ -13,6 +13,7 @@ import { useProjectStore } from '@/stores/projects'
 import { useProfileStore } from '@/stores/profile'
 import { useSEO } from '@/composables/useSEO'
 
+const SITE_URL = import.meta.env.VITE_APP_URL || 'https://bb-made.com'
 const projectStore = useProjectStore()
 const profileStore = useProfileStore()
 
@@ -36,9 +37,11 @@ watch(
   (profile) => {
     if (!profile) return
 
+    // /os 是彩蛋頁，有自己的標題與 canonical，不跟首頁搶
     setPageMeta({
-      title: `${profile.name || 'Bob Tsou'} | 前端工程師・地端 AI 內容產線負責人 作品集`,
+      title: `Portfolio OS | ${profile.name || 'Bob Tsou'} 作品集`,
       description: profile.meta_description || profile.bio || undefined,
+      url: `${SITE_URL}/os`,
       type: 'website'
     })
   },

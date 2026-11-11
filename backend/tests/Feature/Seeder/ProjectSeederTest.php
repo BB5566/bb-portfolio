@@ -47,7 +47,7 @@ class ProjectSeederTest extends TestCase
         $featured = Project::whereNotNull('case_study')->orderBy('sort_order')->get();
 
         $this->assertSame(
-            ['how-i-review-ai-code', 'ai-content-pipeline', 'student-page-load-optimization'],
+            ['homepage-nuxt-rebuild', 'ai-content-pipeline', 'student-page-load-optimization', 'how-i-review-ai-code'],
             $featured->pluck('slug')->all()
         );
         foreach ($featured as $project) {
@@ -57,5 +57,7 @@ class ProjectSeederTest extends TestCase
         }
         $this->assertSame('pipeline', $featured->firstWhere('slug', 'ai-content-pipeline')->case_study['demo']);
         $this->assertSame(3040, $featured->firstWhere('slug', 'student-page-load-optimization')->case_study['compare']['before']);
+        // 橫幅的真實比例條：2,033 KB→79 KB
+        $this->assertSame(['before' => 2033, 'after' => 79], array_intersect_key($featured->first()->case_study['compare'], ['before' => 0, 'after' => 0]));
     }
 }

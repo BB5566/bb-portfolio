@@ -24,7 +24,7 @@
       </ul>
       <p class="how">{{ copy.how }}</p>
       <div class="go">
-        <a :href="resumeUrl">履歷 PDF</a>
+        <a :href="resumeUrl" target="_blank" rel="noopener">履歷 PDF</a>
         <a v-if="email" class="alt" :href="`mailto:${email}`">寄信</a>
       </div>
     </div>

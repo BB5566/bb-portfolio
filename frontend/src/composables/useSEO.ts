@@ -8,6 +8,7 @@ interface SEOConfig {
   image?: string
   url?: string
   type?: 'website' | 'article' | 'profile'
+  noindex?: boolean // 找不到的頁面：不給搜尋引擎收錄
 }
 
 /**
@@ -23,11 +24,11 @@ export function useSEO() {
    * 設定頁面 Meta 標籤
    */
   const setPageMeta = (config: SEOConfig) => {
-    const title = config.title || 'Bob Tsou | 前端工程師・地端 AI 內容產線負責人 作品集'
+    const title = config.title || 'Bob Tsou | 前端工程師・Vue 3 × 地端 AI 作品集'
     const description =
       config.description ||
-      '前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。'
-    const image = config.image || `${baseUrl}/og-image-v5.png`
+      '前端工程師（Vue 3 × TypeScript），並一人重建公司的地端 AI 內容產線：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。'
+    const image = config.image || `${baseUrl}/og-image-v6.png`
     const url = config.url || baseUrl
 
     useHead(
@@ -35,6 +36,7 @@ export function useSEO() {
         title,
         meta: [
           { name: 'description', content: description },
+          { name: 'robots', content: config.noindex ? 'noindex' : 'index, follow' },
           // Open Graph
           { property: 'og:title', content: title },
           { property: 'og:description', content: description },
@@ -101,10 +103,10 @@ export function useSEO() {
       '@type': 'WebSite',
       '@id': `${baseUrl}/#website`,
       name: 'Bob Tsou Portfolio',
-      alternateName: 'Bob Tsou 前端工程師・地端 AI 內容產線負責人 作品集',
+      alternateName: 'Bob Tsou 前端工程師・Vue 3 × 地端 AI 作品集',
       url: baseUrl,
       description:
-        '前端工程師（Vue 3 × TypeScript），兼任地端 AI 內容產線負責人：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。',
+        '前端工程師（Vue 3 × TypeScript），並一人重建公司的地端 AI 內容產線：官網首頁讀取的資料 2 MB→79 KB（本機量測）、786／829 本教材可自動抓考題、內容產製流程自動化。',
       inLanguage: 'zh-TW',
       author: { '@id': `${baseUrl}/#person` }
     }
@@ -123,7 +125,7 @@ export function useSEO() {
       '@type': 'CreativeWork',
       name: project.title,
       description: project.description,
-      url: `${baseUrl}/projects/${project.id}`,
+      url: `${baseUrl}/projects/${project.slug || project.id}`,
       image: coverImage,
       dateCreated: project.created_at,
       keywords:

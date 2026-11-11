@@ -100,6 +100,34 @@ function cssPreloadPlugin(): Plugin {
   }
 }
 
+/**
+ * 404.html：不存在的網址由 nginx 回 404 狀態碼並送出這一頁。
+ * 內容就是 index.html（Vue 照樣啟動、顯示缺頁畫面），只把標題換掉、robots 改 noindex，
+ * 不讓缺頁掛著首頁的標題被搜尋引擎收錄。等前面兩個外掛改完 index.html 才複製。
+ */
+function notFoundPagePlugin(): Plugin {
+  return {
+    name: 'not-found-page',
+    apply: 'build',
+    enforce: 'post',
+    closeBundle: {
+      order: 'post',
+      sequential: true,
+      async handler() {
+        const fs = await import('fs')
+        const html = await fs.promises.readFile('dist/index.html', 'utf-8')
+        const page = html
+          .replace(/<title>.*?<\/title>/s, '<title>找不到這一頁 | Bob Tsou 作品集</title>')
+          .replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex">')
+          .replace(/\s*<link rel="canonical"[^>]*>/, '')
+        if (!page.includes('content="noindex"')) throw new Error('404.html 沒有換到 robots 標籤')
+        await fs.promises.writeFile('dist/404.html', page, 'utf-8')
+        console.log('✅ Wrote dist/404.html')
+      }
+    }
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -118,7 +146,8 @@ export default defineConfig({
     }),
     // Phase 2: Critical CSS inline + API preconnect (production build only)
     process.env.NODE_ENV === 'production' ? cssPreloadPlugin() : null,
-    process.env.NODE_ENV === 'production' ? simpleCriticalCSSPlugin() : null
+    process.env.NODE_ENV === 'production' ? simpleCriticalCSSPlugin() : null,
+    notFoundPagePlugin()
   ],
   resolve: {
     alias: {

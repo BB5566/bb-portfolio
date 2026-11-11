@@ -53,4 +53,12 @@ class Project extends Model
     {
         return $query->where('is_published', true);
     }
+
+    /**
+     * 網址上的代稱可以是英文 slug（正式網址）或數字 id（舊連結）
+     */
+    public function scopeWhereKeyOrSlug($query, string $key)
+    {
+        return ctype_digit($key) ? $query->whereKey((int) $key) : $query->where('slug', $key);
+    }
 }

@@ -66,7 +66,7 @@
           </template>
 
           <div class="finder__actions">
-            <RouterLink :to="`/projects/${selected.id}`" class="finder__btn finder__btn--primary">
+            <RouterLink :to="`/projects/${selected.slug || selected.id}`" class="finder__btn finder__btn--primary">
               開啟完整頁面
             </RouterLink>
             <a

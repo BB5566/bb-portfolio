@@ -9,6 +9,12 @@ const PAIRS: [string, string][] = [
   ['「', '」']
 ]
 
+/** 第一句（到第一個句號為止）；作品頁已經有「問題／做法／結果」時，開頭只留這一句 */
+export function firstSentence(text: string): string {
+  const end = text.indexOf('。')
+  return end === -1 ? text : text.slice(0, end + 1)
+}
+
 export function summarize(text: string, max = 60): string {
   if (text.length <= max) return text
 

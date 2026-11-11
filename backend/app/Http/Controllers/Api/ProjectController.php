@@ -57,11 +57,13 @@ class ProjectController extends Controller
     /**
      * 取得單一專案詳情（前台公開使用，僅限已發布的）
      */
-    public function publicShow(int $id): JsonResponse
+    public function publicShow(string $key): JsonResponse
     {
+        // 收英文 slug 或數字 id
         $project = Project::with(['category', 'tags', 'galleries'])
             ->published()
-            ->findOrFail($id);
+            ->whereKeyOrSlug($key)
+            ->firstOrFail();
 
         return response()->json($project);
     }
